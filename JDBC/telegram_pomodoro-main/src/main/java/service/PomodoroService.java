@@ -3,7 +3,7 @@ package service;
 import java.sql.SQLException;
 
 public interface PomodoroService {
-    void startPomodoro(long chatId) throws SQLException;
+    void startPomodoro(long chatId) ;
     void stopPomodoro(long chatId);
     String getStatistics(long chatId);
     String getAchievements(long chatId);

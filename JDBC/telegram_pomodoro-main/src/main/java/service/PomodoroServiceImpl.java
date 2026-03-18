@@ -31,7 +31,7 @@ public class PomodoroServiceImpl implements PomodoroService {
     }
 
     @Override
-    public void startPomodoro(long chatId) throws SQLException {
+    public void startPomodoro(long chatId)  {
         if (activeTasks.containsKey(chatId)) {
             sendMessage(chatId, "Таймер Pomodoro уже запущен.");
             return;
@@ -51,11 +51,7 @@ public class PomodoroServiceImpl implements PomodoroService {
             sendMessage(chatId, "Пора отдыхать!");
 
             // Запуск периода отдыха
-            try {
                 userDataRepository.recordSession(chatId, "REST", restDuration, LocalDateTime.now());
-            } catch (SQLException e) {
-                throw new RuntimeException(e);
-            }
             sendMessage(chatId, "Период отдыха (" + restDuration + " мин) начался.");
 
             // Планируем завершение отдыха через restDuration минут

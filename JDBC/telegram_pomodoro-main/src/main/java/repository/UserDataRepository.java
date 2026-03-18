@@ -5,7 +5,7 @@ import java.time.LocalDateTime;
 
 public interface UserDataRepository {
     // Создание записи о новом сеансе (WORK или REST)
-    void recordSession(long chatId, String sessionType, int durationMinutes, LocalDateTime startAt) throws SQLException;
+    void recordSession(long chatId, String sessionType, int durationMinutes, LocalDateTime startAt);
 
     // Обновление записи о сеансе (завершение периода)
     void completeSession(long chatId, String sessionType, LocalDateTime stopAt);

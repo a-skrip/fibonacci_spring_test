@@ -1,9 +1,6 @@
 package repository;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.Timestamp;
+import java.sql.*;
 import java.time.LocalDateTime;
 
 public class DataBaseUserDataRepository implements UserDataRepository {
@@ -31,12 +28,42 @@ public class DataBaseUserDataRepository implements UserDataRepository {
 
             preparedStatement.execute();
         } catch (Exception e) {
-            System.err.println("ERROR в записи SESSION: " + e.getMessage());
+            System.err.println("ERROR записи SESSION: " + e.getMessage());
         }
     }
 
     @Override
     public void completeSession(long chatId, String sessionType, LocalDateTime stopAt) {
+        String query = """
+                UPDATE user_sessions SET stop_at = ?, completed = true
+                WHERE id = (
+                SELECT id
+                FROM user_sessions
+                WHERE chat_id = ? AND type = ? AND stop_at IS NULL
+                ORDER BY start_at DESC
+                LIMIT 1);
+                """;
+
+        try (Connection connection = DriverManager.getConnection(DB_URL, DB_LOGIN, DB_PASSWORD);
+             PreparedStatement prepareStatement = connection.prepareStatement(query)
+        ) {
+            prepareStatement.setTimestamp(1, Timestamp.valueOf(stopAt));
+            prepareStatement.setLong(2, chatId);
+            prepareStatement.setString(3, sessionType);
+
+            int updateRows = prepareStatement.executeUpdate();
+
+            if (updateRows > 0) {
+                System.out.println("Обновление успешно");
+            } else {
+                System.err.println("Не найдена активная сессия " + sessionType + " для chatId= " + chatId);
+            }
+
+
+        } catch (SQLException e) {
+            System.err.println("Ошибка обновления поля stop_at " + e.getMessage());
+        }
+
 
     }
 
