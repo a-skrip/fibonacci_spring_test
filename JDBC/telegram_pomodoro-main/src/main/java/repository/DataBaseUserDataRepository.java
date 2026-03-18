@@ -99,12 +99,14 @@ public class DataBaseUserDataRepository implements UserDataRepository {
         String query = """
                 SELECT type, sum(duration) AS sum_duration, count(*) AS total_cycles
                 FROM user_sessions
-                WHERE completed = true
+                WHERE chat_id = ? AND completed = true
                 GROUP BY type
                 ORDER BY type DESC;
                 """;
         try (Connection connection = DriverManager.getConnection(DB_URL, DB_LOGIN, DB_PASSWORD);
              PreparedStatement prepareStatement = connection.prepareStatement(query)) {
+
+            prepareStatement.setLong(1, chatId);
 
             ResultSet resultSet = prepareStatement.executeQuery();
             boolean hasData = false;
