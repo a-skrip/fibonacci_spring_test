@@ -6,6 +6,7 @@ import org.telegram.telegrambots.meta.generics.TelegramClient;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
+import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.*;
@@ -30,7 +31,7 @@ public class PomodoroServiceImpl implements PomodoroService {
     }
 
     @Override
-    public void startPomodoro(long chatId) {
+    public void startPomodoro(long chatId) throws SQLException {
         if (activeTasks.containsKey(chatId)) {
             sendMessage(chatId, "Таймер Pomodoro уже запущен.");
             return;
@@ -50,7 +51,11 @@ public class PomodoroServiceImpl implements PomodoroService {
             sendMessage(chatId, "Пора отдыхать!");
 
             // Запуск периода отдыха
-            userDataRepository.recordSession(chatId, "REST", restDuration, LocalDateTime.now());
+            try {
+                userDataRepository.recordSession(chatId, "REST", restDuration, LocalDateTime.now());
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
             sendMessage(chatId, "Период отдыха (" + restDuration + " мин) начался.");
 
             // Планируем завершение отдыха через restDuration минут
