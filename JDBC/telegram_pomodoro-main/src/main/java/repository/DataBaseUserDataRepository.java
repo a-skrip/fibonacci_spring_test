@@ -100,7 +100,8 @@ public class DataBaseUserDataRepository implements UserDataRepository {
                 SELECT type, sum(duration) AS sum_duration, count(*) AS total_cycles
                 FROM user_sessions
                 WHERE completed = true
-                GROUP BY type;
+                GROUP BY type
+                ORDER BY type DESC;
                 """;
         try (Connection connection = DriverManager.getConnection(DB_URL, DB_LOGIN, DB_PASSWORD);
              PreparedStatement prepareStatement = connection.prepareStatement(query)) {
