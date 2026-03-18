@@ -89,12 +89,48 @@ public class DataBaseUserDataRepository implements UserDataRepository {
         } catch (SQLException e) {
             System.err.println("Ошибка обновления поля stop_at " + e.getMessage());
         }
-
     }
 
     @Override
     public String getStatistics(long chatId) {
-        return "";
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("Статистика: \n");
+
+        String query = """
+                SELECT type, sum(duration) AS sum_duration, count(*) AS total_cycles
+                FROM user_sessions
+                WHERE completed = true
+                GROUP BY type;
+                """;
+        try (Connection connection = DriverManager.getConnection(DB_URL, DB_LOGIN, DB_PASSWORD);
+             PreparedStatement prepareStatement = connection.prepareStatement(query)) {
+
+            ResultSet resultSet = prepareStatement.executeQuery();
+            boolean hasData = false;
+
+            while (resultSet.next()) {
+                hasData = true;
+                String type = resultSet.getString("type");
+                int sumDuration = resultSet.getInt("sum_duration");
+                int totalCycles = resultSet.getInt("total_cycles");
+
+                if (type.equalsIgnoreCase("WORK")) {
+                    stringBuilder.append("• Рабочее время: ").append(sumDuration).append(" мин").append("\n")
+                            .append("• Рабочих циклов: ").append(totalCycles).append("\n");
+                } else {
+                    stringBuilder.append("• Отдых: ").append(sumDuration).append(" мин").append("\n")
+                            .append("• Циклов отдыха: ").append(totalCycles).append("\n");
+                }
+            }
+
+            if (!hasData) {
+                stringBuilder.append(" ОТСУТСТВУЕТ");
+            }
+
+        } catch (Exception e) {
+            System.out.println("Ошибка выполнения запроса" + e.getMessage());
+        }
+        return stringBuilder.toString();
     }
 
     @Override
