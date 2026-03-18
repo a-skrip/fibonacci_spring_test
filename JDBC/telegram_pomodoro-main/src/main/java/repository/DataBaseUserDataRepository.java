@@ -1,20 +1,27 @@
 package repository;
 
+import config.Config;
+
 import java.sql.*;
 import java.time.LocalDateTime;
 
 public class DataBaseUserDataRepository implements UserDataRepository {
+    private final String DB_URL;
+    private final String DB_LOGIN;
+    private final String DB_PASSWORD;
 
-    private static final String DB_URL = "jdbc:postgresql://localhost:5432/pomodoro";
-    private static final String DB_LOGIN = "postgres";
-    private static final String DB_PASSWORD = "root";
-
-    public DataBaseUserDataRepository() {
+    public DataBaseUserDataRepository(Config config) {
+        this.DB_URL = config.dbUrl();
+        this.DB_LOGIN = config.dbUser();
+        this.DB_PASSWORD = config.dbPassword();
     }
 
     @Override
     public void recordSession(long chatId, String sessionType, int durationMinutes, LocalDateTime startAt) {
-        String query = "INSERT INTO user_sessions (chat_id, type, duration, start_at, completed) values (?, ?, ?, ?, ?);";
+        String query = """
+                INSERT INTO user_sessions (chat_id, type, duration, start_at, completed)
+                values (?, ?, ?, ?, ?);
+                """;
 
         try (
                 Connection connection = DriverManager.getConnection(DB_URL, DB_LOGIN, DB_PASSWORD);
@@ -129,7 +136,6 @@ public class DataBaseUserDataRepository implements UserDataRepository {
             if (!hasData) {
                 stringBuilder.append(" ОТСУТСТВУЕТ");
             }
-
         } catch (Exception e) {
             System.out.println("Ошибка выполнения запроса" + e.getMessage());
         }

@@ -22,7 +22,7 @@ public class Main {
         // Инициализируем зависимости
         var telegramClient = new OkHttpTelegramClient(botToken);
 //        var userDataRepository = new CsvUserDataRepository();
-        var dbRepository = new DataBaseUserDataRepository();
+        var dbRepository = new DataBaseUserDataRepository(config);
 //        var pomodoroService = new PomodoroServiceImpl(userDataRepository, telegramClient, config);
         var pomodoroService = new PomodoroServiceImpl(dbRepository, telegramClient, config);
 
