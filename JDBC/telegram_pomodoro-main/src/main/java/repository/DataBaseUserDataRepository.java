@@ -58,17 +58,37 @@ public class DataBaseUserDataRepository implements UserDataRepository {
             } else {
                 System.err.println("Не найдена активная сессия " + sessionType + " для chatId= " + chatId);
             }
-
-
         } catch (SQLException e) {
             System.err.println("Ошибка обновления поля stop_at " + e.getMessage());
         }
-
-
     }
 
     @Override
     public void markSessionStopped(long chatId, LocalDateTime stopAt) {
+        String query = """
+                UPDATE user_sessions SET stop_at = ?
+                        WHERE id = (
+                        SELECT id
+                        FROM user_sessions
+                        WHERE chat_id = ? AND stop_at IS NULL
+                        ORDER BY start_at DESC
+                        LIMIT 1);
+                """;
+        try (Connection connection = DriverManager.getConnection(DB_URL, DB_LOGIN, DB_PASSWORD);
+             PreparedStatement prepareStatement = connection.prepareStatement(query)
+        ) {
+            prepareStatement.setTimestamp(1, Timestamp.valueOf(stopAt));
+            prepareStatement.setLong(2, chatId);
+
+            int updateRows = prepareStatement.executeUpdate();
+            if (updateRows > 0) {
+                System.out.println("Обновление успешно");
+            } else {
+                System.err.println("Не найдена активная сессия для chatId = " + chatId);
+            }
+        } catch (SQLException e) {
+            System.err.println("Ошибка обновления поля stop_at " + e.getMessage());
+        }
 
     }
 
