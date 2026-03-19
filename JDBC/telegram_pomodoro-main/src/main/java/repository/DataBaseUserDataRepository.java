@@ -217,7 +217,7 @@ public class DataBaseUserDataRepository implements UserDataRepository {
         String query = """
                 SELECT start_at
                  FROM user_sessions
-                 WHERE chat_id = ? AND completed = true
+                 WHERE chat_id = ? AND type = 'WORK' AND completed = true
                  ORDER BY start_at
                  LIMIT 1;
                 """;
@@ -240,7 +240,7 @@ public class DataBaseUserDataRepository implements UserDataRepository {
                 SELECT start_at
                 FROM user_sessions
                 WHERE chat_id = ?
-                  AND completed = true
+                  AND completed = true 
                   AND (SELECT COUNT(*)
                        FROM user_sessions
                        WHERE chat_id = ? AND type = 'WORK' AND completed = true) >= 10
@@ -267,8 +267,8 @@ public class DataBaseUserDataRepository implements UserDataRepository {
                 SELECT start_at
                         FROM user_sessions
                         WHERE chat_id = ?
-                        AND completed  = true
-                        and start_at::time BETWEEN '00:00:00' AND '06:00:00'
+                        AND completed  = true AND type = 'WORK'
+                        AND start_at::time BETWEEN '00:00:00' AND '06:00:00'
                         order by start_at DESC
                         LIMIT 1;
                 """;
