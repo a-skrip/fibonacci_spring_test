@@ -58,7 +58,6 @@ public class DataBaseUserDataRepository implements UserDataRepository {
             int updateRows = preparedStatement.executeUpdate();
 
             if (updateRows > 0) {
-                System.out.println("Обновление успешно");
                 try (PreparedStatement prepared = getConnection().prepareStatement(addLineAchievements)) {
                     prepared.setLong(1, chatId);
                     prepared.setLong(2, chatId);
@@ -73,7 +72,6 @@ public class DataBaseUserDataRepository implements UserDataRepository {
         } catch (SQLException e) {
             System.err.println("Ошибка обновления поля stop_at " + e.getMessage());
         }
-
     }
 
     @Override
@@ -174,7 +172,6 @@ public class DataBaseUserDataRepository implements UserDataRepository {
                 prepareStatement.setTimestamp(1, Timestamp.valueOf(first));
                 prepareStatement.setLong(2, chatId);
                 prepareStatement.execute();
-                System.out.println("insertFirst "+ first);
                 stringBuilder.append("\uD83D\uDE80 ").append("Стартапер").append(" | ").append(first, 0, 10).append("\n");
             } catch (SQLException e) {
                 System.err.println("Не удалось обновить " + e.getMessage());
@@ -185,7 +182,6 @@ public class DataBaseUserDataRepository implements UserDataRepository {
                 prepareStatement.setTimestamp(1, Timestamp.valueOf(ten));
                 prepareStatement.setLong(2, chatId);
                 prepareStatement.execute();
-                System.out.println("insertTen " + ten);
                 stringBuilder.append("\uD83C\uDFC6 ").append("Марафонец").append(" | ").append(ten, 0, 10).append("\n");
             } catch (SQLException e) {
                 System.err.println("Не удалось обновить " + e.getMessage());
@@ -196,7 +192,6 @@ public class DataBaseUserDataRepository implements UserDataRepository {
                 prepareStatement.setTimestamp(1, Timestamp.valueOf(night));
                 prepareStatement.setLong(2, chatId);
                 prepareStatement.execute();
-                System.out.println("insertNight " + night);
                 stringBuilder.append("\uD83C\uDF19 ").append("Cовёнок").append(" | ").append(night, 0, 10).append("\n");
             } catch (SQLException e) {
                 System.err.println("Не удалось обновить " + e.getMessage());
@@ -240,7 +235,7 @@ public class DataBaseUserDataRepository implements UserDataRepository {
                 SELECT start_at
                 FROM user_sessions
                 WHERE chat_id = ?
-                  AND completed = true 
+                  AND completed = true
                   AND (SELECT COUNT(*)
                        FROM user_sessions
                        WHERE chat_id = ? AND type = 'WORK' AND completed = true) >= 10

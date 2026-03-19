@@ -7,8 +7,6 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.meta.generics.TelegramClient;
 import service.PomodoroService;
 
-import java.sql.SQLException;
-
 public class PomodoroBot implements LongPollingSingleThreadUpdateConsumer {
 
     private final TelegramClient telegramClient;
@@ -32,7 +30,7 @@ public class PomodoroBot implements LongPollingSingleThreadUpdateConsumer {
         // Разбираем команды
         if (messageText.startsWith("/start_pomo")) {
 
-                pomodoroService.startPomodoro(chatId);
+            pomodoroService.startPomodoro(chatId);
 
             sendTextMessage(chatId, "Pomodoro запущен!");
         } else if (messageText.startsWith("/stop")) {
