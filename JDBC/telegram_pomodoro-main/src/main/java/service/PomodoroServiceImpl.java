@@ -1,14 +1,15 @@
 package service;
 
 import config.Config;
-import repository.UserDataRepository;
-import org.telegram.telegrambots.meta.generics.TelegramClient;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
+import org.telegram.telegrambots.meta.generics.TelegramClient;
+import repository.UserDataRepository;
 
-import java.sql.SQLException;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.*;
 
 public class PomodoroServiceImpl implements PomodoroService {
@@ -31,7 +32,7 @@ public class PomodoroServiceImpl implements PomodoroService {
     }
 
     @Override
-    public void startPomodoro(long chatId)  {
+    public void startPomodoro(long chatId) {
         if (activeTasks.containsKey(chatId)) {
             sendMessage(chatId, "Таймер Pomodoro уже запущен.");
             return;
@@ -51,7 +52,7 @@ public class PomodoroServiceImpl implements PomodoroService {
             sendMessage(chatId, "Пора отдыхать!");
 
             // Запуск периода отдыха
-                userDataRepository.recordSession(chatId, "REST", restDuration, LocalDateTime.now());
+            userDataRepository.recordSession(chatId, "REST", restDuration, LocalDateTime.now());
             sendMessage(chatId, "Период отдыха (" + restDuration + " мин) начался.");
 
             // Планируем завершение отдыха через restDuration минут
@@ -92,6 +93,7 @@ public class PomodoroServiceImpl implements PomodoroService {
 
     @Override
     public String getAchievements(long chatId) {
+
         return userDataRepository.getAchievements(chatId);
     }
 

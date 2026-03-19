@@ -6,14 +6,10 @@ import java.sql.*;
 import java.time.LocalDateTime;
 
 public class DataBaseUserDataRepository implements UserDataRepository {
-    private final String DB_URL;
-    private final String DB_LOGIN;
-    private final String DB_PASSWORD;
+    private final Config config;
 
     public DataBaseUserDataRepository(Config config) {
-        this.DB_URL = config.dbUrl();
-        this.DB_LOGIN = config.dbUser();
-        this.DB_PASSWORD = config.dbPassword();
+        this.config = config;
     }
 
     @Override
@@ -23,10 +19,7 @@ public class DataBaseUserDataRepository implements UserDataRepository {
                 values (?, ?, ?, ?, ?);
                 """;
 
-        try (
-                Connection connection = DriverManager.getConnection(DB_URL, DB_LOGIN, DB_PASSWORD);
-                PreparedStatement preparedStatement = connection.prepareStatement(query)
-        ) {
+        try (PreparedStatement preparedStatement = getConnection().prepareStatement(query)) {
             preparedStatement.setLong(1, chatId);
             preparedStatement.setString(2, sessionType);
             preparedStatement.setInt(3, durationMinutes);
@@ -51,14 +44,12 @@ public class DataBaseUserDataRepository implements UserDataRepository {
                 LIMIT 1);
                 """;
 
-        try (Connection connection = DriverManager.getConnection(DB_URL, DB_LOGIN, DB_PASSWORD);
-             PreparedStatement prepareStatement = connection.prepareStatement(query)
-        ) {
-            prepareStatement.setTimestamp(1, Timestamp.valueOf(stopAt));
-            prepareStatement.setLong(2, chatId);
-            prepareStatement.setString(3, sessionType);
+        try (PreparedStatement preparedStatement = getConnection().prepareStatement(query)) {
+            preparedStatement.setTimestamp(1, Timestamp.valueOf(stopAt));
+            preparedStatement.setLong(2, chatId);
+            preparedStatement.setString(3, sessionType);
 
-            int updateRows = prepareStatement.executeUpdate();
+            int updateRows = preparedStatement.executeUpdate();
 
             if (updateRows > 0) {
                 System.out.println("Обновление успешно");
@@ -81,13 +72,11 @@ public class DataBaseUserDataRepository implements UserDataRepository {
                         ORDER BY start_at DESC
                         LIMIT 1);
                 """;
-        try (Connection connection = DriverManager.getConnection(DB_URL, DB_LOGIN, DB_PASSWORD);
-             PreparedStatement prepareStatement = connection.prepareStatement(query)
-        ) {
-            prepareStatement.setTimestamp(1, Timestamp.valueOf(stopAt));
-            prepareStatement.setLong(2, chatId);
+        try (PreparedStatement preparedStatement = getConnection().prepareStatement(query)) {
+            preparedStatement.setTimestamp(1, Timestamp.valueOf(stopAt));
+            preparedStatement.setLong(2, chatId);
 
-            int updateRows = prepareStatement.executeUpdate();
+            int updateRows = preparedStatement.executeUpdate();
             if (updateRows > 0) {
                 System.out.println("Обновление успешно");
             } else {
@@ -110,12 +99,10 @@ public class DataBaseUserDataRepository implements UserDataRepository {
                 GROUP BY type
                 ORDER BY type DESC;
                 """;
-        try (Connection connection = DriverManager.getConnection(DB_URL, DB_LOGIN, DB_PASSWORD);
-             PreparedStatement prepareStatement = connection.prepareStatement(query)) {
+        try (PreparedStatement preparedStatement = getConnection().prepareStatement(query)) {
+            preparedStatement.setLong(1, chatId);
 
-            prepareStatement.setLong(1, chatId);
-
-            ResultSet resultSet = prepareStatement.executeQuery();
+            ResultSet resultSet = preparedStatement.executeQuery();
             boolean hasData = false;
 
             while (resultSet.next()) {
@@ -137,18 +124,103 @@ public class DataBaseUserDataRepository implements UserDataRepository {
                 stringBuilder.append(" ОТСУТСТВУЕТ");
             }
         } catch (Exception e) {
-            System.out.println("Ошибка выполнения запроса" + e.getMessage());
+            System.err.println("Ошибка выполнения запроса" + e.getMessage());
         }
         return stringBuilder.toString();
     }
 
     @Override
     public String getAchievements(long chatId) {
+        String first = checkCompletedFirstWorkCycles(chatId);
+        String ten = checkAndSetCompletedTenWorkCycles(chatId);
+        String night = checkCompletedNightWorkCycles(chatId);
         return "";
     }
+
 
     @Override
     public byte[] exportStatistics(long chatId) {
         return new byte[0];
+    }
+
+    public String checkCompletedFirstWorkCycles(long chaiId) {
+        StringBuilder stringBuilder = new StringBuilder();
+//        stringBuilder.append("");
+        String query = """
+                SELECT start_at
+                 FROM user_sessions
+                 WHERE chat_id = ? AND completed = true
+                 ORDER BY start_at
+                 LIMIT 1;
+                """;
+        try (PreparedStatement prepareStatement = getConnection().prepareStatement(query)) {
+            prepareStatement.setLong(1, chaiId);
+            ResultSet resultSet = prepareStatement.executeQuery();
+            if (resultSet.next()) {
+                Timestamp start_at = resultSet.getTimestamp("start_at");
+                stringBuilder.append(start_at);
+            }
+        } catch (SQLException e) {
+            System.err.println("Ошибка выполнения запроса" + e.getMessage());
+        }
+        return stringBuilder.toString();
+    }
+
+    public String checkCompletedNightWorkCycles(long chatId) {
+        StringBuilder stringBuilder = new StringBuilder();
+        String query = """
+                SELECT start_at
+                FROM user_sessions
+                WHERE chat_id = ?
+                  AND completed = true
+                  AND (SELECT COUNT(*)
+                       FROM user_sessions
+                       WHERE chat_id = ? AND completed = true) >= 10
+                ORDER BY start_at DESC
+                LIMIT 1;
+                """;
+        try (PreparedStatement prepareStatement = getConnection().prepareStatement(query)) {
+            prepareStatement.setLong(1, chatId);
+            prepareStatement.setLong(2, chatId);
+            ResultSet resultSet = prepareStatement.executeQuery();
+            if (resultSet.next()) {
+                Timestamp start_at = resultSet.getTimestamp("start_at");
+                stringBuilder.append(start_at);
+            }
+        } catch (SQLException e) {
+            System.err.println("Ошибка выполнения запроса" + e.getMessage());
+        }
+        return stringBuilder.toString();
+    }
+
+    public String checkAndSetCompletedTenWorkCycles(long chatId) {
+        StringBuilder stringBuilder = new StringBuilder();
+        String query = """
+                SELECT start_at
+                        FROM user_sessions
+                        WHERE chat_id = ?
+                        AND completed  = true
+                        and start_at::time BETWEEN '00:00:00' AND '06:00:00'
+                        order by start_at
+                        LIMIT 1;
+                """;
+        try (PreparedStatement prepareStatement = getConnection().prepareStatement(query)) {
+            prepareStatement.setLong(1, chatId);
+            ResultSet resultSet = prepareStatement.executeQuery();
+            if (resultSet.next()) {
+                Timestamp start_at = resultSet.getTimestamp("start_at");
+                stringBuilder.append(start_at);
+            }
+        } catch (SQLException e) {
+            System.err.println("Ошибка выполнения запроса" + e.getMessage());
+        }
+        return stringBuilder.toString();
+    }
+
+    private Connection getConnection() throws SQLException {
+        String dbUrl = this.config.dbUrl();
+        String dbUser = this.config.dbUser();
+        String dbPassword = this.config.dbPassword();
+        return DriverManager.getConnection(dbUrl, dbUser, dbPassword);
     }
 }
