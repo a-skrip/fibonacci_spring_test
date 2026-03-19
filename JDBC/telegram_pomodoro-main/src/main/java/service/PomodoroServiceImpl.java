@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class PomodoroServiceImpl implements PomodoroService {
 
@@ -93,7 +94,6 @@ public class PomodoroServiceImpl implements PomodoroService {
 
     @Override
     public String getAchievements(long chatId) {
-
         return userDataRepository.getAchievements(chatId);
     }
 

@@ -43,7 +43,13 @@ public class DataBaseUserDataRepository implements UserDataRepository {
                 ORDER BY start_at DESC
                 LIMIT 1);
                 """;
-
+        String addLineAchievements = """
+                INSERT INTO user_achievements (chat_id)
+                SELECT ?
+                WHERE NOT EXISTS (
+                    SELECT 1 FROM user_achievements WHERE chat_id = ?
+                );
+                """;
         try (PreparedStatement preparedStatement = getConnection().prepareStatement(query)) {
             preparedStatement.setTimestamp(1, Timestamp.valueOf(stopAt));
             preparedStatement.setLong(2, chatId);
@@ -53,12 +59,21 @@ public class DataBaseUserDataRepository implements UserDataRepository {
 
             if (updateRows > 0) {
                 System.out.println("Обновление успешно");
+                try (PreparedStatement prepared = getConnection().prepareStatement(addLineAchievements)) {
+                    prepared.setLong(1, chatId);
+                    prepared.setLong(2, chatId);
+                    prepared.execute();
+                    System.out.println("addLineAchievements");
+                } catch (SQLException e) {
+                    System.err.println("Не удалось добавить строку для achievements " + e.getMessage());
+                }
             } else {
                 System.err.println("Не найдена активная сессия " + sessionType + " для chatId= " + chatId);
             }
         } catch (SQLException e) {
             System.err.println("Ошибка обновления поля stop_at " + e.getMessage());
         }
+
     }
 
     @Override
@@ -131,10 +146,64 @@ public class DataBaseUserDataRepository implements UserDataRepository {
 
     @Override
     public String getAchievements(long chatId) {
+        StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append("Достижения:").append("\n");
         String first = checkCompletedFirstWorkCycles(chatId);
-        String ten = checkAndSetCompletedTenWorkCycles(chatId);
+        String insertFirst = """
+                UPDATE user_achievements
+                SET is_startupper = true , date_startupper = ?
+                WHERE chat_id = ?;
+                """;
+
+        String ten = checkCompletedTenWorkCycles(chatId);
+        String insertTen = """
+                UPDATE user_achievements
+                SET is_marathon_runner = true , date_marathon_runner = ?
+                WHERE chat_id = ?;
+                """;
+
         String night = checkCompletedNightWorkCycles(chatId);
-        return "";
+        String insertNight = """
+                UPDATE user_achievements
+                SET is_worker_night = true , date_worker_night = ?
+                WHERE chat_id = ?;
+                """;
+
+        if (!first.isEmpty()) {
+            try (PreparedStatement prepareStatement = getConnection().prepareStatement(insertFirst)) {
+                prepareStatement.setTimestamp(1, Timestamp.valueOf(first));
+                prepareStatement.setLong(2, chatId);
+                prepareStatement.execute();
+                System.out.println("insertFirst "+ first);
+                stringBuilder.append("\uD83D\uDE80 ").append("Стартапер").append(" | ").append(first, 0, 10).append("\n");
+            } catch (SQLException e) {
+                System.err.println("Не удалось обновить " + e.getMessage());
+            }
+        }
+        if (!ten.isEmpty()) {
+            try (PreparedStatement prepareStatement = getConnection().prepareStatement(insertTen)) {
+                prepareStatement.setTimestamp(1, Timestamp.valueOf(ten));
+                prepareStatement.setLong(2, chatId);
+                prepareStatement.execute();
+                System.out.println("insertTen " + ten);
+                stringBuilder.append("\uD83C\uDFC6 ").append("Марафонец").append(" | ").append(ten, 0, 10).append("\n");
+            } catch (SQLException e) {
+                System.err.println("Не удалось обновить " + e.getMessage());
+            }
+        }
+        if (!night.isEmpty()) {
+            try (PreparedStatement prepareStatement = getConnection().prepareStatement(insertNight)) {
+                prepareStatement.setTimestamp(1, Timestamp.valueOf(night));
+                prepareStatement.setLong(2, chatId);
+                prepareStatement.execute();
+                System.out.println("insertNight " + night);
+                stringBuilder.append("\uD83C\uDF19 ").append("Cовёнок").append(" | ").append(night, 0, 10).append("\n");
+            } catch (SQLException e) {
+                System.err.println("Не удалось обновить " + e.getMessage());
+            }
+        }
+
+        return stringBuilder.toString();
     }
 
 
@@ -143,9 +212,8 @@ public class DataBaseUserDataRepository implements UserDataRepository {
         return new byte[0];
     }
 
-    public String checkCompletedFirstWorkCycles(long chaiId) {
+    private String checkCompletedFirstWorkCycles(long chaiId) {
         StringBuilder stringBuilder = new StringBuilder();
-//        stringBuilder.append("");
         String query = """
                 SELECT start_at
                  FROM user_sessions
@@ -166,7 +234,7 @@ public class DataBaseUserDataRepository implements UserDataRepository {
         return stringBuilder.toString();
     }
 
-    public String checkCompletedNightWorkCycles(long chatId) {
+    private String checkCompletedTenWorkCycles(long chatId) {
         StringBuilder stringBuilder = new StringBuilder();
         String query = """
                 SELECT start_at
@@ -175,7 +243,7 @@ public class DataBaseUserDataRepository implements UserDataRepository {
                   AND completed = true
                   AND (SELECT COUNT(*)
                        FROM user_sessions
-                       WHERE chat_id = ? AND completed = true) >= 10
+                       WHERE chat_id = ? AND type = 'WORK' AND completed = true) >= 10
                 ORDER BY start_at DESC
                 LIMIT 1;
                 """;
@@ -193,7 +261,7 @@ public class DataBaseUserDataRepository implements UserDataRepository {
         return stringBuilder.toString();
     }
 
-    public String checkAndSetCompletedTenWorkCycles(long chatId) {
+    private String checkCompletedNightWorkCycles(long chatId) {
         StringBuilder stringBuilder = new StringBuilder();
         String query = """
                 SELECT start_at
@@ -201,7 +269,7 @@ public class DataBaseUserDataRepository implements UserDataRepository {
                         WHERE chat_id = ?
                         AND completed  = true
                         and start_at::time BETWEEN '00:00:00' AND '06:00:00'
-                        order by start_at
+                        order by start_at DESC
                         LIMIT 1;
                 """;
         try (PreparedStatement prepareStatement = getConnection().prepareStatement(query)) {
