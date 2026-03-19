@@ -55,7 +55,6 @@ public class CsvUserDataRepository implements UserDataRepository {
      * При автоматическом завершении сессии (по таймеру) обновляем запись:
      * - Записываем время окончания в stop_at
      * - Устанавливаем completed = "true"
-     *
      * Пример:
      * "WORK","25","2025-02-09 15:21","2025-02-09 15:46","true"
      */

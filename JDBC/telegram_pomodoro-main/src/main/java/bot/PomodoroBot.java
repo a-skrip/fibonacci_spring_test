@@ -29,7 +29,9 @@ public class PomodoroBot implements LongPollingSingleThreadUpdateConsumer {
 
         // Разбираем команды
         if (messageText.startsWith("/start_pomo")) {
+
             pomodoroService.startPomodoro(chatId);
+
             sendTextMessage(chatId, "Pomodoro запущен!");
         } else if (messageText.startsWith("/stop")) {
             pomodoroService.stopPomodoro(chatId);

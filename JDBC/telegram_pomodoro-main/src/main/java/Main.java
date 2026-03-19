@@ -3,7 +3,7 @@ import config.Config;
 import config.ConfigReaderEnvironment;
 import org.telegram.telegrambots.client.okhttp.OkHttpTelegramClient;
 import org.telegram.telegrambots.longpolling.TelegramBotsLongPollingApplication;
-import repository.CsvUserDataRepository;
+import repository.DataBaseUserDataRepository;
 import service.PomodoroServiceImpl;
 
 public class Main {
@@ -14,8 +14,11 @@ public class Main {
 
         // Инициализируем зависимости
         var telegramClient = new OkHttpTelegramClient(botToken);
-        var userDataRepository = new CsvUserDataRepository();
-        var pomodoroService = new PomodoroServiceImpl(userDataRepository, telegramClient, config);
+//        var userDataRepository = new CsvUserDataRepository();
+        var dbRepository = new DataBaseUserDataRepository(config);
+//        var pomodoroService = new PomodoroServiceImpl(userDataRepository, telegramClient, config);
+        var pomodoroService = new PomodoroServiceImpl(dbRepository, telegramClient, config);
+
 
         try (var botsApplication = new TelegramBotsLongPollingApplication()) {
             botsApplication.registerBot(botToken, new PomodoroBot(telegramClient, pomodoroService));
