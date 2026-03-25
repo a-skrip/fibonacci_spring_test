@@ -1,0 +1,6 @@
+server:
+  port: 8091
+logging:
+  level:
+    ru.skriplex.springnewsapplication: debug
+
