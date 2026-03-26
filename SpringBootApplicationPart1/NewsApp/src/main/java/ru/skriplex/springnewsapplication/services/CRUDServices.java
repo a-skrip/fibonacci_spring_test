@@ -1,4 +1,4 @@
-package ru.skriplex.springnewsapplication.service;
+package ru.skriplex.springnewsapplication.services;
 
 import java.util.Collection;
 

@@ -1,0 +1,31 @@
+package ru.skriplex.springnewsapplication.entities;
+
+import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
+
+import java.time.Instant;
+
+@Entity
+@Getter
+@Setter
+@Table(name = "news")
+public class News {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
+    private Long id;
+
+    @Column(name = "title")
+    private String title;
+
+    @Column(name = "text_news")
+    private String text;
+
+    @Column(name = "creation_time")
+    private Instant date;
+
+    @JoinColumn(name = "category_id")
+    @ManyToOne
+    private Category category;
+}

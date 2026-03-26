@@ -1,0 +1,24 @@
+package ru.skriplex.springnewsapplication.mapper;
+
+import ru.skriplex.springnewsapplication.dtos.CategoryDto;
+import ru.skriplex.springnewsapplication.entities.Category;
+
+public class CategoryMapper {
+
+    public static CategoryDto mapToDto(Category categoryEntity) {
+        CategoryDto categoryDto = new CategoryDto();
+        categoryDto.setTitle(categoryEntity.getTitle());
+        return categoryDto;
+    }
+
+    public static Category mapToEntity(CategoryDto categoryDto) {
+        Category categoryEntity = new Category();
+        categoryEntity.setId(categoryDto.getId());
+        categoryEntity.setTitle(categoryDto.getTitle());
+        categoryEntity.setListNews(categoryDto.getListNews().stream()
+                .map(NewsMapper::mapToEntity)
+                .toList()
+        );
+        return categoryEntity;
+    }
+}

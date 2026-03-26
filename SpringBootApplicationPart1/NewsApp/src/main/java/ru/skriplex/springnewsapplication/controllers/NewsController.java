@@ -1,13 +1,13 @@
-package ru.skriplex.springnewsapplication.controller;
+package ru.skriplex.springnewsapplication.controllers;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import ru.skriplex.springnewsapplication.dto.ErrorResponse;
-import ru.skriplex.springnewsapplication.dto.NewsDto;
-import ru.skriplex.springnewsapplication.service.NewsService;
+import ru.skriplex.springnewsapplication.errors.ErrorResponse;
+import ru.skriplex.springnewsapplication.dtos.NewsDto;
+import ru.skriplex.springnewsapplication.services.NewsService;
 
 import java.util.Collection;
 
