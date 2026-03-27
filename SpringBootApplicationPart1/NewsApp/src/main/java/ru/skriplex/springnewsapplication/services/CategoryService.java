@@ -15,7 +15,6 @@ import java.util.Collection;
 @RequiredArgsConstructor
 public class CategoryService implements CRUDServices<CategoryDto> {
 
-    //TODO исправить миграции на SQL
     private final CategoryRepository categoryRepository;
 
     @Override

@@ -51,7 +51,7 @@ public class CategoryController {
     public ResponseEntity<?> updateCategory(@RequestBody CategoryDto categoryDto) {
         CategoryDto response;
         try {
-           response = categoryService.update(categoryDto);
+            response = categoryService.update(categoryDto);
         } catch (RuntimeException e) {
             ErrorResponse errorResponse = new ErrorResponse(
                     String.format("Категория с id: %d не найдена.", categoryDto.getId()));

@@ -16,10 +16,7 @@ public class CategoryMapper {
         Category categoryEntity = new Category();
         categoryEntity.setId(categoryDto.getId());
         categoryEntity.setTitle(categoryDto.getTitle());
-//        categoryEntity.setListNews(categoryDto.getListNews().stream()
-//                .map(NewsMapper::mapToEntity)
-//                .toList()
-//        );
+
         return categoryEntity;
     }
 }

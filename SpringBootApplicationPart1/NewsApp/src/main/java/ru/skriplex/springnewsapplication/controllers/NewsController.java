@@ -35,7 +35,7 @@ public class NewsController {
 
     @GetMapping("/category/{id}")
     public ResponseEntity<?> getAllNews(@PathVariable long id) {
-        Collection<NewsDto> allNews = service.getAll(id);
+        Collection<NewsDto> allNews = service.getAllNewsByCategoryId(id);
         return ResponseEntity.ok(allNews);
     }
 

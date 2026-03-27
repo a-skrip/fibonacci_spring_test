@@ -1,0 +1,7 @@
+databaseChangeLog:
+  - include:
+      file: db/changelog/create-categories-table.sql
+      relativeToChangelogFile: false
+  - include:
+      file: db/changelog/create-news-table.sql
+      relativeToChangelogFile: false

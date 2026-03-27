@@ -12,14 +12,11 @@ import ru.skriplex.springnewsapplication.repositories.NewsRepository;
 
 import java.time.Instant;
 import java.util.Collection;
-import java.util.List;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class NewsService implements CRUDServices<NewsDto> {
-
-    //TODO исправить миграции на SQL
 
     private final NewsRepository newsRepository;
     private final CategoryRepository categoryRepository;
@@ -38,8 +35,8 @@ public class NewsService implements CRUDServices<NewsDto> {
                 .map(NewsMapper::mapToDto)
                 .toList();
     }
-    
-    public Collection<NewsDto> getAll(long id) {
+
+    public Collection<NewsDto> getAllNewsByCategoryId(long id) {
         Collection<News> allByCategoryId = newsRepository.getAllByCategoryId(id);
         return allByCategoryId.stream()
                 .map(NewsMapper::mapToDto)
@@ -68,7 +65,7 @@ public class NewsService implements CRUDServices<NewsDto> {
                         String.format("Новость с id: %d не найдена", newsDto.getId())));
         Category category = categoryRepository.findByTitle(newsDto.getCategory())
                 .orElseThrow(() -> new IllegalArgumentException(
-                        String.format("Категория \"%s\" не найдена.", newsDto.getCategory())));
+                        String.format("Категория: '%s - не найдена.", newsDto.getCategory())));
 
         newsToUpdate.setCategory(category);
         newsToUpdate.setTitle(newsDto.getTitle());

@@ -2,7 +2,6 @@ package ru.skriplex.springnewsapplication.mapper;
 
 import lombok.RequiredArgsConstructor;
 import ru.skriplex.springnewsapplication.dtos.NewsDto;
-import ru.skriplex.springnewsapplication.entities.Category;
 import ru.skriplex.springnewsapplication.entities.News;
 
 @RequiredArgsConstructor
