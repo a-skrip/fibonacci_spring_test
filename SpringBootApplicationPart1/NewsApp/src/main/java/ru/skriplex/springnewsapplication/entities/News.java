@@ -25,7 +25,7 @@ public class News {
     @Column(name = "creation_time")
     private Instant date;
 
-    @JoinColumn(name = "category_id")
     @ManyToOne
+    @JoinColumn(name = "category_id")
     private Category category;
 }
