@@ -34,19 +34,18 @@ public class CategoryService implements CRUDServices<CategoryDto> {
     }
 
     @Override
-    public void create(CategoryDto categoryDto) {
-        Category category = CategoryMapper.mapToEntity(categoryDto);
-        categoryRepository.save(category);
+    public CategoryDto create(CategoryDto categoryDto) {
+        Category save = categoryRepository.save(CategoryMapper.mapToEntity(categoryDto));
         log.info("create Category: {}", categoryDto.getTitle());
-
+        return CategoryMapper.mapToDto(save);
     }
 
     @Override
-    public void update(CategoryDto categoryDto) {
+    public CategoryDto update(CategoryDto categoryDto) {
         Category category = categoryRepository.findById(categoryDto.getId()).orElseThrow();
-        category.setTitle(categoryDto.getTitle());
-        categoryRepository.save(category);
         log.info("update category: {} -> {}", category.getTitle(), categoryDto.getTitle());
+        category.setTitle(categoryDto.getTitle());
+        return CategoryMapper.mapToDto(categoryRepository.save(category));
     }
 
     @Override

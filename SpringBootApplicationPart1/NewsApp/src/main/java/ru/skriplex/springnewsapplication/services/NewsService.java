@@ -39,23 +39,23 @@ public class NewsService implements CRUDServices<NewsDto> {
     }
 
     @Override
-    public void create(NewsDto newsDto) {
+    public NewsDto create(NewsDto newsDto) {
         News news = NewsMapper.mapToEntity(newsDto);
         Long categoryId = newsDto.getCategoryId();
         Category category = categoryRepository.findById(categoryId).orElseThrow();
         news.setCategory(category);
         news.setDate(Instant.now());
-        newsRepository.save(news);
         log.info("Вызов метода creat");
+        return NewsMapper.mapToDto(newsRepository.save(news));
     }
 
     @Override
-    public void update(NewsDto newsDto) {
+    public NewsDto update(NewsDto newsDto) {
         News news = newsRepository.findById(newsDto.getId()).orElseThrow();
         news.setTitle(newsDto.getTitle());
         news.setText(newsDto.getText());
-        newsRepository.save(news);
         log.info("Вызов метода create");
+        return NewsMapper.mapToDto(newsRepository.save(news));
     }
 
     @Override

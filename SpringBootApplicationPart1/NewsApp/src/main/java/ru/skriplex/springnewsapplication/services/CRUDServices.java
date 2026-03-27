@@ -7,9 +7,9 @@ public interface CRUDServices<T> {
 
     Collection<T> getAll();
 
-    void create(T item);
+    T create(T item);
 
-    void update(T item);
+    T update(T item);
 
     void delete(Long id);
 
