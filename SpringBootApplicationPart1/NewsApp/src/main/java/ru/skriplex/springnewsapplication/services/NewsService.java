@@ -12,7 +12,6 @@ import ru.skriplex.springnewsapplication.repositories.NewsRepository;
 
 import java.time.Instant;
 import java.util.Collection;
-import java.util.Optional;
 
 @Slf4j
 @Service
@@ -26,9 +25,6 @@ public class NewsService implements CRUDServices<NewsDto> {
 
     @Override
     public NewsDto getById(Long id) {
-//        if (id == null) {
-//            throw new RuntimeException("Не передан id");
-//        }
         log.info("Вызов метода getById({}) ", id);
         News news = newsRepository.findById(id).orElseThrow();
         return NewsMapper.mapToDto(news);
@@ -44,31 +40,20 @@ public class NewsService implements CRUDServices<NewsDto> {
 
     @Override
     public void create(NewsDto newsDto) {
-
-//        long nextId = storage.isEmpty() ? 1 : storage.keySet().stream()
-//                .max(Long::compareTo).get() + 1;
-//        item.setId(nextId);
-//        item.setDate(Instant.now());
         News news = NewsMapper.mapToEntity(newsDto);
         Long categoryId = newsDto.getCategoryId();
         Category category = categoryRepository.findById(categoryId).orElseThrow();
         news.setCategory(category);
+        news.setDate(Instant.now());
         newsRepository.save(news);
         log.info("Вызов метода creat");
     }
 
     @Override
     public void update(NewsDto newsDto) {
-//        Long newsId = item.getId();
-//        if (!storage.containsKey(newsId)) {
-//            throw new RuntimeException();
-//        }
-//        item.setDate(Instant.now());
-//        storage.put(newsId, item);
-        News news = NewsMapper.mapToEntity(newsDto);
-        Long categoryId = newsDto.getCategoryId();
-        Category category = categoryRepository.findById(categoryId).orElseThrow();
-        news.setCategory(category);
+        News news = newsRepository.findById(newsDto.getId()).orElseThrow();
+        news.setTitle(newsDto.getTitle());
+        news.setText(newsDto.getText());
         newsRepository.save(news);
         log.info("Вызов метода create");
     }

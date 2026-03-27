@@ -19,6 +19,7 @@ public class NewsMapper {
         newsEntity.setTitle(newsDto.getTitle());
         newsEntity.setText(newsDto.getText());
         newsEntity.setDate(newsDto.getDate());
+
         return newsEntity;
     }
 }

@@ -5,11 +5,12 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import ru.skriplex.springnewsapplication.errors.ErrorResponse;
 import ru.skriplex.springnewsapplication.dtos.NewsDto;
+import ru.skriplex.springnewsapplication.errors.ErrorResponse;
 import ru.skriplex.springnewsapplication.services.NewsService;
 
 import java.util.Collection;
+import java.util.NoSuchElementException;
 
 @RestController
 @RequestMapping("/api/news")
@@ -24,11 +25,12 @@ public class NewsController {
 
     @GetMapping("/{id}")
     public ResponseEntity<?> getNewsById(@PathVariable long id) {
-        NewsDto news = service.getById(id);
-        if (news == null) {
+        NewsDto news;
+        try {
+            news = service.getById(id);
+        } catch (NoSuchElementException e) {
             ErrorResponse errorResponse = new ErrorResponse(
-                    String.format("Новость с ID %d не найдена.", id)
-            );
+                    String.format("Новость с ID %d не найдена.", id));
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
         }
         return ResponseEntity.ok(news);
@@ -42,7 +44,18 @@ public class NewsController {
 
     @PostMapping
     public ResponseEntity<?> createNews(@RequestBody NewsDto item) {
-        service.create(item);
+        try {
+            service.create(item);
+        } catch (Exception e) {
+            if (item.getCategoryId() == null) {
+                ErrorResponse errorResponse = new ErrorResponse(
+                        "Не передана категория новостей");
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+            }
+            ErrorResponse errorResponse = new ErrorResponse(
+                    String.format("Категория с ID: %d не найдена.", item.getCategoryId()));
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+        }
         return ResponseEntity.status(201).body(item);
     }
 
