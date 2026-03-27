@@ -19,15 +19,15 @@ public class CategoryController {
 
     @GetMapping("/{id}")
     public ResponseEntity<?> getCategoryById(@PathVariable long id) {
-        CategoryDto category;
+        CategoryDto response;
         try {
-            category = categoryService.getById(id);
+            response = categoryService.getById(id);
         } catch (RuntimeException e) {
             ErrorResponse errorResponse = new ErrorResponse(
                     String.format("Категория с id: %d не найдена.", id));
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
         }
-        return ResponseEntity.ok(category);
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping
@@ -37,20 +37,27 @@ public class CategoryController {
 
     @PostMapping
     public ResponseEntity<?> createCategory(@RequestBody CategoryDto categoryDto) {
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .body(categoryService.create(categoryDto));
+        CategoryDto response;
+        try {
+            response = categoryService.create(categoryDto);
+        } catch (RuntimeException e) {
+            ErrorResponse errorResponse = new ErrorResponse("Есть такая категория");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+        }
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @PutMapping()
     public ResponseEntity<?> updateCategory(@RequestBody CategoryDto categoryDto) {
+        CategoryDto response;
         try {
-            categoryService.update(categoryDto);
+           response = categoryService.update(categoryDto);
         } catch (RuntimeException e) {
             ErrorResponse errorResponse = new ErrorResponse(
                     String.format("Категория с id: %d не найдена.", categoryDto.getId()));
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
         }
-        return ResponseEntity.ok(categoryDto);
+        return ResponseEntity.ok(response);
     }
 
     @DeleteMapping("/{id}")

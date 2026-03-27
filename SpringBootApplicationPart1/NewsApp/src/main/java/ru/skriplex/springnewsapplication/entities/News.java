@@ -3,6 +3,7 @@ package ru.skriplex.springnewsapplication.entities;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 import java.time.Instant;
 
@@ -10,6 +11,7 @@ import java.time.Instant;
 @Getter
 @Setter
 @Table(name = "news")
+@ToString
 public class News {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

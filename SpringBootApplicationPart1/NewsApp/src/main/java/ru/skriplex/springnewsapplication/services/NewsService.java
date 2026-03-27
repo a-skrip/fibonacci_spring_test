@@ -12,6 +12,7 @@ import ru.skriplex.springnewsapplication.repositories.NewsRepository;
 
 import java.time.Instant;
 import java.util.Collection;
+import java.util.List;
 
 @Slf4j
 @Service
@@ -37,25 +38,43 @@ public class NewsService implements CRUDServices<NewsDto> {
                 .map(NewsMapper::mapToDto)
                 .toList();
     }
+    
+    public Collection<NewsDto> getAll(long id) {
+        Collection<News> allByCategoryId = newsRepository.getAllByCategoryId(id);
+        return allByCategoryId.stream()
+                .map(NewsMapper::mapToDto)
+                .toList();
+    }
 
     @Override
     public NewsDto create(NewsDto newsDto) {
         News news = NewsMapper.mapToEntity(newsDto);
-        Long categoryId = newsDto.getCategoryId();
-        Category category = categoryRepository.findById(categoryId).orElseThrow();
-        news.setCategory(category);
+        String nameCategory = newsDto.getCategory();
+        Category category = categoryRepository.findByTitle(nameCategory)
+                .orElseThrow();
+
         news.setDate(Instant.now());
-        log.info("Вызов метода creat");
-        return NewsMapper.mapToDto(newsRepository.save(news));
+        news.setCategory(category);
+        News savedNews = newsRepository.save(news);
+        log.info("Вызов метода createNews");
+        return NewsMapper.mapToDto(savedNews);
     }
 
     @Override
     public NewsDto update(NewsDto newsDto) {
-        News news = newsRepository.findById(newsDto.getId()).orElseThrow();
-        news.setTitle(newsDto.getTitle());
-        news.setText(newsDto.getText());
-        log.info("Вызов метода create");
-        return NewsMapper.mapToDto(newsRepository.save(news));
+        News newsToUpdate;
+        newsToUpdate = newsRepository.findById(newsDto.getId())
+                .orElseThrow(() -> new IllegalArgumentException(
+                        String.format("Новость с id: %d не найдена", newsDto.getId())));
+        Category category = categoryRepository.findByTitle(newsDto.getCategory())
+                .orElseThrow(() -> new IllegalArgumentException(
+                        String.format("Категория \"%s\" не найдена.", newsDto.getCategory())));
+
+        newsToUpdate.setCategory(category);
+        newsToUpdate.setTitle(newsDto.getTitle());
+        newsToUpdate.setText(newsDto.getText());
+        log.info("Вызов метода update");
+        return NewsMapper.mapToDto(newsRepository.save(newsToUpdate));
     }
 
     @Override

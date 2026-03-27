@@ -16,11 +16,12 @@ public class NewsDto {
     private Long id;
     private String title;
     private String text;
-    private Long categoryId;
+//    private Long categoryId;
     @JsonFormat(
             shape = JsonFormat.Shape.STRING,
             pattern = "yyyy-MM-dd'T'HH:mm:ss",
             timezone = "Europe/Moscow"
     )
     private Instant date;
+    private String category;
 }

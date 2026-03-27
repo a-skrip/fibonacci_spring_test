@@ -2,8 +2,6 @@ package ru.skriplex.springnewsapplication.controllers;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -24,49 +22,51 @@ public class NewsController {
 
     @GetMapping("/{id}")
     public ResponseEntity<?> getNewsById(@PathVariable long id) {
-        NewsDto news;
+        NewsDto newsDto;
         try {
-            news = service.getById(id);
+            newsDto = service.getById(id);
         } catch (NoSuchElementException e) {
             ErrorResponse errorResponse = new ErrorResponse(
                     String.format("Новость с id: %d не найдена.", id));
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
         }
-        return ResponseEntity.ok(news);
+        return ResponseEntity.ok(newsDto);
     }
 
-    @GetMapping
-    public ResponseEntity<?> getAllNews() {
-        Collection<NewsDto> allNews = service.getAll();
+    @GetMapping("/category/{id}")
+    public ResponseEntity<?> getAllNews(@PathVariable long id) {
+        Collection<NewsDto> allNews = service.getAll(id);
         return ResponseEntity.ok(allNews);
     }
 
-    @PostMapping
+    @PostMapping()
     public ResponseEntity<?> createNews(@RequestBody NewsDto newsDto) {
+        NewsDto response;
         try {
-            service.create(newsDto);
+            response = service.create(newsDto);
         } catch (Exception e) {
-            if (newsDto.getCategoryId() == null) {
+            if (newsDto.getCategory() == null) {
                 ErrorResponse errorResponse = new ErrorResponse(
                         "Не передана категория новостей");
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
             }
             ErrorResponse errorResponse = new ErrorResponse(
-                    String.format("Категория с ID: %d не найдена.", newsDto.getCategoryId()));
+                    String.format("Категория: %s не найдена.", newsDto.getTitle()));
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
         }
-        return ResponseEntity.status(201).body(newsDto);
+        return ResponseEntity.status(201).body(response);
     }
 
     @PutMapping
-    public ResponseEntity<?> updateNews(@RequestBody NewsDto newsDto) {
+    public ResponseEntity<?> updateNewsWithCategory(@RequestBody NewsDto newsDto) {
+        NewsDto response;
         try {
-            service.update(newsDto);
+            response = service.update(newsDto);
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(new ErrorResponse(String.format("Новость с id %d не найдена", newsDto.getId())));
+                    .body(new ErrorResponse(e.getMessage()));
         }
-        return ResponseEntity.ok(newsDto);
+        return ResponseEntity.ok(response);
     }
 
     @DeleteMapping("/{id}")

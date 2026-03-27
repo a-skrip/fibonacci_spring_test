@@ -16,7 +16,6 @@ import java.util.Collection;
 public class CategoryService implements CRUDServices<CategoryDto> {
 
     //TODO исправить миграции на SQL
-
     private final CategoryRepository categoryRepository;
 
     @Override
@@ -35,6 +34,9 @@ public class CategoryService implements CRUDServices<CategoryDto> {
 
     @Override
     public CategoryDto create(CategoryDto categoryDto) {
+        if (categoryRepository.findByTitle(categoryDto.getTitle()).isPresent()) {
+            throw new RuntimeException();
+        }
         Category save = categoryRepository.save(CategoryMapper.mapToEntity(categoryDto));
         log.info("create Category: {}", categoryDto.getTitle());
         return CategoryMapper.mapToDto(save);
