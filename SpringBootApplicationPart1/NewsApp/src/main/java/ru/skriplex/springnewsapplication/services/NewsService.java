@@ -23,33 +23,34 @@ public class NewsService implements CRUDServices<NewsDto> {
 
     private final NewsRepository newsRepository;
     private final CategoryRepository categoryRepository;
+    private final NewsMapper newsMapper;
 
     @Override
     public NewsDto getById(Long id) {
         log.info("Вызов метода getById({}) ", id);
         News news = newsRepository.findById(id)
                 .orElseThrow(() -> new NewsNotFoundException("Новость с id:" + id + " не найдена"));
-        return NewsMapper.mapToDto(news);
+        return newsMapper.toDto(news);
     }
 
     @Override
     public Collection<NewsDto> getAll() {
         log.info("Вызов метода getAll()");
         return newsRepository.findAll().stream()
-                .map(NewsMapper::mapToDto)
+                .map(newsMapper::toDto)
                 .toList();
     }
 
     public Collection<NewsDto> getAllNewsByCategoryId(long id) {
         Collection<News> allByCategoryId = newsRepository.getAllByCategoryId(id);
         return allByCategoryId.stream()
-                .map(NewsMapper::mapToDto)
+                .map(newsMapper::toDto)
                 .toList();
     }
 
     @Override
     public NewsDto create(NewsDto newsDto) {
-        News news = NewsMapper.mapToEntity(newsDto);
+        News news = newsMapper.toEntity(newsDto);
         String nameCategory = newsDto.getCategory();
         if (nameCategory.isEmpty()) {
             throw new NoTransmittedCategoryException("Не передана категория новостей");
@@ -60,7 +61,7 @@ public class NewsService implements CRUDServices<NewsDto> {
         news.setCategory(category);
         News savedNews = newsRepository.save(news);
         log.info("Вызов метода createNews");
-        return NewsMapper.mapToDto(savedNews);
+        return newsMapper.toDto(savedNews);
     }
 
     @Override
@@ -77,7 +78,7 @@ public class NewsService implements CRUDServices<NewsDto> {
         newsToUpdate.setCategory(category);
         newsToUpdate.setTitle(newsDto.getTitle());
         newsToUpdate.setText(newsDto.getText());
-        return NewsMapper.mapToDto(newsRepository.save(newsToUpdate));
+        return newsMapper.toDto(newsRepository.save(newsToUpdate));
     }
 
     @Override

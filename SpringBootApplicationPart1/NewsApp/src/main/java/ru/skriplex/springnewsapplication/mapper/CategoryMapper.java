@@ -1,22 +1,29 @@
 package ru.skriplex.springnewsapplication.mapper;
 
+import org.mapstruct.Mapper;
+import org.mapstruct.Named;
 import ru.skriplex.springnewsapplication.dtos.CategoryDto;
 import ru.skriplex.springnewsapplication.entities.Category;
 
-public class CategoryMapper {
+@Mapper(componentModel = "spring")
+public interface CategoryMapper {
 
-    public static CategoryDto mapToDto(Category categoryEntity) {
-        CategoryDto categoryDto = new CategoryDto();
-        categoryDto.setId(categoryEntity.getId());
-        categoryDto.setTitle(categoryEntity.getTitle());
-        return categoryDto;
+    CategoryDto toDto(Category category);
+
+    Category toEntity(CategoryDto categoryDto);
+
+    @Named("categoryToTitle")
+    static String categoryToTitle(Category category) {
+        return category != null ? category.getTitle() : null;
     }
 
-    public static Category mapToEntity(CategoryDto categoryDto) {
-        Category categoryEntity = new Category();
-        categoryEntity.setId(categoryDto.getId());
-        categoryEntity.setTitle(categoryDto.getTitle());
-
-        return categoryEntity;
+    @Named("titleToCategory")
+    static Category titleToCategory(String title) {
+        if (title == null) {
+            return null;
+        }
+        Category category = new Category();
+        category.setTitle(title);
+        return category;
     }
 }

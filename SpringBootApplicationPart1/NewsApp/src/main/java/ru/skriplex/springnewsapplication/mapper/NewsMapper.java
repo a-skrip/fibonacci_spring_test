@@ -1,30 +1,19 @@
 package ru.skriplex.springnewsapplication.mapper;
 
-import lombok.RequiredArgsConstructor;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import ru.skriplex.springnewsapplication.dtos.NewsDto;
 import ru.skriplex.springnewsapplication.entities.News;
 
-@RequiredArgsConstructor
-public class NewsMapper {
+@Mapper(componentModel = "spring", uses = CategoryMapper.class)
+public interface NewsMapper {
 
+    @Mapping(source = "category", target = "category", qualifiedByName = "categoryToTitle")
+    @Mapping(source = "text", target = "text")
+    NewsDto toDto(News news);
 
-    public static NewsDto mapToDto(News newsEntity) {
-        NewsDto newsDto = new NewsDto();
-        newsDto.setId(newsEntity.getId());
-        newsDto.setTitle(newsEntity.getTitle());
-        newsDto.setText(newsEntity.getText());
-        newsDto.setDate(newsEntity.getDate());
-        newsDto.setCategory(newsEntity.getCategory().getTitle());
-        return newsDto;
-    }
-
-    public static News mapToEntity(NewsDto newsDto) {
-        News newsEntity = new News();
-        newsEntity.setId(newsDto.getId());
-        newsEntity.setTitle(newsDto.getTitle());
-        newsEntity.setText(newsDto.getText());
-        newsEntity.setDate(newsDto.getDate());
-
-        return newsEntity;
-    }
+    @Mapping(source = "category", target = "category", qualifiedByName = "titleToCategory")
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "date", ignore = true)
+    News toEntity(NewsDto newsDto);
 }

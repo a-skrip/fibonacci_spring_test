@@ -18,20 +18,21 @@ import java.util.Collection;
 public class CategoryService implements CRUDServices<CategoryDto> {
 
     private final CategoryRepository categoryRepository;
+    private final CategoryMapper categoryMapper;
 
     @Override
     public CategoryDto getById(Long id) {
         log.info("Получить категорию по id: {}", id);
         Category category = categoryRepository.findById(id)
                 .orElseThrow(() -> new CategoryNotFoundException("Категория с id:" + id + " не найдена"));
-        return CategoryMapper.mapToDto(category);
+        return categoryMapper.toDto(category);
     }
 
     @Override
     public Collection<CategoryDto> getAll() {
         log.info("Получение всех Categories");
         return categoryRepository.findAll().stream()
-                .map(CategoryMapper::mapToDto)
+                .map(categoryMapper::toDto)
                 .toList();
     }
 
@@ -40,9 +41,9 @@ public class CategoryService implements CRUDServices<CategoryDto> {
         if (categoryRepository.findByTitle(categoryDto.getTitle()).isPresent()) {
             throw new CategoryIsPresentException("Категория: " + categoryDto.getTitle() + " уже присутствует");
         }
-        Category save = categoryRepository.save(CategoryMapper.mapToEntity(categoryDto));
+        Category save = categoryRepository.save(categoryMapper.toEntity(categoryDto));
         log.info("create Category: {}", categoryDto.getTitle());
-        return CategoryMapper.mapToDto(save);
+        return categoryMapper.toDto(save);
     }
 
     @Override
@@ -51,7 +52,7 @@ public class CategoryService implements CRUDServices<CategoryDto> {
                 .orElseThrow(() -> new CategoryNotFoundException("Категория с id:" + categoryDto.getId() + " не найдена"));
         log.info("update category: {} -> {}", category.getTitle(), categoryDto.getTitle());
         category.setTitle(categoryDto.getTitle());
-        return CategoryMapper.mapToDto(categoryRepository.save(category));
+        return categoryMapper.toDto(categoryRepository.save(category));
     }
 
     @Override
