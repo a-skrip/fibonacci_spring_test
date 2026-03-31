@@ -6,6 +6,9 @@ import org.springframework.stereotype.Service;
 import ru.skriplex.springnewsapplication.dtos.NewsDto;
 import ru.skriplex.springnewsapplication.entities.Category;
 import ru.skriplex.springnewsapplication.entities.News;
+import ru.skriplex.springnewsapplication.exception.CategoryNotFoundException;
+import ru.skriplex.springnewsapplication.exception.NewsNotFoundException;
+import ru.skriplex.springnewsapplication.exception.NoTransmittedCategoryException;
 import ru.skriplex.springnewsapplication.mapper.NewsMapper;
 import ru.skriplex.springnewsapplication.repositories.CategoryRepository;
 import ru.skriplex.springnewsapplication.repositories.NewsRepository;
@@ -24,7 +27,8 @@ public class NewsService implements CRUDServices<NewsDto> {
     @Override
     public NewsDto getById(Long id) {
         log.info("Вызов метода getById({}) ", id);
-        News news = newsRepository.findById(id).orElseThrow();
+        News news = newsRepository.findById(id)
+                .orElseThrow(() -> new NewsNotFoundException("Новость с id:" + id + " не найдена"));
         return NewsMapper.mapToDto(news);
     }
 
@@ -47,9 +51,11 @@ public class NewsService implements CRUDServices<NewsDto> {
     public NewsDto create(NewsDto newsDto) {
         News news = NewsMapper.mapToEntity(newsDto);
         String nameCategory = newsDto.getCategory();
+        if (nameCategory.isEmpty()) {
+            throw new NoTransmittedCategoryException("Не передана категория новостей");
+        }
         Category category = categoryRepository.findByTitle(nameCategory)
-                .orElseThrow();
-
+                .orElseThrow(() -> new CategoryNotFoundException("Категория:" + nameCategory + " не найдена"));
         news.setDate(Instant.now());
         news.setCategory(category);
         News savedNews = newsRepository.save(news);
@@ -61,23 +67,24 @@ public class NewsService implements CRUDServices<NewsDto> {
     public NewsDto update(NewsDto newsDto) {
         News newsToUpdate;
         newsToUpdate = newsRepository.findById(newsDto.getId())
-                .orElseThrow(() -> new IllegalArgumentException(
-                        String.format("Новость с id: %d не найдена", newsDto.getId())));
+                .orElseThrow(() -> new NewsNotFoundException("Новость с id:" + newsDto.getId() + " не найдена"));
         Category category = categoryRepository.findByTitle(newsDto.getCategory())
-                .orElseThrow(() -> new IllegalArgumentException(
-                        String.format("Категория: '%s - не найдена.", newsDto.getCategory())));
+                .orElseThrow(() -> new CategoryNotFoundException("Категория:\"" + newsDto.getCategory() + "\" не найдена."));
+
+        log.info("update newsId:{}, category:{} -> {}",
+                newsToUpdate.getId(), newsToUpdate.getCategory().getTitle(), newsDto.getCategory());
 
         newsToUpdate.setCategory(category);
         newsToUpdate.setTitle(newsDto.getTitle());
         newsToUpdate.setText(newsDto.getText());
-        log.info("Вызов метода update");
         return NewsMapper.mapToDto(newsRepository.save(newsToUpdate));
     }
 
     @Override
     public void delete(Long id) {
         log.info("Вызов метода delete для id = {}", id);
-        newsRepository.findById(id).orElseThrow();
+        newsRepository.findById(id)
+                .orElseThrow(() -> new NewsNotFoundException("Новость с id:" + id + " не найдена"));
         newsRepository.deleteById(id);
     }
 }
