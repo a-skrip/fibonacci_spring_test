@@ -1,4 +1,4 @@
-package ru.skriplex.springnewsapplication.errors;
+package ru.skriplex.springnewsapplication.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

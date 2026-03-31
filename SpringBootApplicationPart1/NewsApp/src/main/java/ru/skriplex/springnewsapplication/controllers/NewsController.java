@@ -6,7 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.skriplex.springnewsapplication.dtos.NewsDto;
-import ru.skriplex.springnewsapplication.errors.ErrorResponse;
+import ru.skriplex.springnewsapplication.response.ErrorResponse;
 import ru.skriplex.springnewsapplication.services.NewsService;
 
 import java.util.Collection;
