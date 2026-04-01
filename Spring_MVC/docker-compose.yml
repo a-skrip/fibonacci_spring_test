@@ -1,0 +1,15 @@
+version: '3.8'
+services:
+  postgres:
+    image: postgres:15
+    container_name: hotel_postgres
+    environment:
+      POSTGRES_DB: hoteldb
+      POSTGRES_USER: hoteluser
+      POSTGRES_PASSWORD: hotelpass
+    ports:
+      - "5433:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+volumes:
+  pgdata: 

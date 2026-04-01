@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Информация об отеле</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-5">
+        <div id="alertContainer"></div>
+        <div class="row">
+            <div class="col-md-8">
+                <h1 th:text="${hotel.name}">Название отеля</h1>
+                <p class="lead" th:text="${hotel.description}">Описание отеля</p>
+                <p>Количество звезд: <span th:text="${hotel.stars}">0</span> &#9733;</p>
+            </div>
+        </div>
+
+        <div class="row mt-4">
+            <div class="col-md-8">
+                <h2>Редактирование отеля</h2>
+                <form id="editForm">
+                    <input type="hidden" id="id" th:value="${hotel.id}" />
+                    
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Название отеля</label>
+                        <input type="text" class="form-control" id="name" name="name" th:value="${hotel.name}" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Описание</label>
+                        <textarea class="form-control" id="description" name="description" rows="3" th:text="${hotel.description}"></textarea>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="stars" class="form-label">Количество звезд</label>
+                        <input type="number" class="form-control" id="stars" name="stars" th:value="${hotel.stars}" min="1" max="5">
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary">Сохранить изменения</button>
+                    <a href="/" class="btn btn-secondary">Вернуться к списку</a>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script th:inline="javascript">
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('editForm');
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const formData = new FormData(form);
+                const data = {
+                    id: formData.get('id'),
+                    name: formData.get('name'),
+                    description: formData.get('description'),
+                    stars: parseInt(formData.get('stars'))
+                };
+                const hotelId = /*[[${hotel.id}]]*/;
+                
+                fetch('/api/v1/hotel/' + hotelId, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                }).then(() => {
+                    // Обновляем все поля отеля на странице
+                    document.querySelector('h1').textContent = data.name;
+                    document.querySelector('.lead').textContent = data.description;
+                    document.querySelector('p:has(span)').innerHTML = `Количество звезд: <span>${data.stars}</span> &#9733;`;
+                    
+                    // Создаем новый alert
+                    const alertContainer = document.getElementById('alertContainer');
+                    const alert = document.createElement('div');
+                    alert.className = 'alert alert-success alert-dismissible fade show';
+                    alert.role = 'alert';
+                    alert.innerHTML = `
+                        Информация об отеле успешно обновлена!
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    `;
+                    
+                    // Добавляем alert в контейнер
+                    alertContainer.innerHTML = '';
+                    alertContainer.appendChild(alert);
+                    
+                    // Добавляем обработчик для кнопки закрытия
+                    const closeButton = alert.querySelector('.btn-close');
+                    closeButton.addEventListener('click', function() {
+                        alert.remove();
+                    });
+                    
+                    // Автоматически удаляем alert через 3 секунды
+                    setTimeout(() => {
+                        if (alert.parentNode) {
+                            alert.remove();
+                        }
+                    }, 3000);
+                });
+            });
+        });
+    </script>
+</body>
+</html> 
