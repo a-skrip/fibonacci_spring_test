@@ -4,3 +4,20 @@ logging:
   level:
     ru.skriplex.springnewsapplication: debug
 
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5433/skillbox
+    username: postgres
+    password: root
+    driver-class-name: org.postgresql.Driver
+
+
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    show-sql: true
+    hibernate:
+      ddl-auto: none
+  liquibase:
+    change-log: classpath:db/changelog/db.changelog-master.yml
+    enabled: true
+    drop-first: false
