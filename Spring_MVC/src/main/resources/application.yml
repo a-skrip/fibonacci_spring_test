@@ -1,0 +1,33 @@
+server:
+  port: 8080
+  #logging:
+  #    level:
+  #      liquibase: DEBUG
+  #    org.springframework.boot: DEBUG
+#  level:
+#    ru.skriplex.springhotelapplication:
+#      debug
+
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5433/hoteldb
+    username: hoteluser
+    password: hotelpass
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    show-sql: true
+    hibernate:
+      ddl-auto: none
+  liquibase:
+      change-log: classpath:db/changelog/db.changelog-master.yaml
+      enabled: true
+      drop-first: false
+#  main:
+#    allow-bean-definition-overriding: true
+#springdoc:
+#  api-docs:
+#    path: /api-docs
+#  swagger-ui:
+#    path: /swa-ui.html

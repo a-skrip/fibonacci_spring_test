@@ -1,4 +1,4 @@
-CREATE TABLE hotel
+CREATE TABLE IF NOT EXISTS hotel
 (
     id          BIGSERIAL PRIMARY KEY,
     name        VARCHAR(255) NOT NULL,
