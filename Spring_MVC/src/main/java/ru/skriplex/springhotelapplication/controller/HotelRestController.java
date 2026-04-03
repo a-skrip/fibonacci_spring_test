@@ -1,16 +1,20 @@
 package ru.skriplex.springhotelapplication.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import ru.skriplex.springhotelapplication.model.Response;
 import ru.skriplex.springhotelapplication.exception.HotelNotFoundException;
 import ru.skriplex.springhotelapplication.model.HotelModel;
+import ru.skriplex.springhotelapplication.model.Response;
 import ru.skriplex.springhotelapplication.service.HotelService;
 
 import java.util.List;
@@ -19,13 +23,16 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("api/v2/hotels")
-@Tag(name = "RestController",description = "REST Api")
+@Tag(name = "RestController", description = "REST Api")
 public class HotelRestController {
 
     private final HotelService service;
 
     @Operation(summary = "Получение списка отелей")
-    @ApiResponse(responseCode = "200", description = "Возврат массива объектов")
+    @ApiResponse(responseCode = "200",
+            description = "Возврат массива объектов",
+            content = @Content(mediaType = "application/json",
+                    array = @ArraySchema(schema = @Schema(implementation = HotelModel.class))))
     @GetMapping
     public ResponseEntity<?> getAllHotels() {
         List<HotelModel> list = service.getAll().stream()
@@ -34,8 +41,16 @@ public class HotelRestController {
     }
 
     @Operation(summary = "Получение отеля по id")
-    @ApiResponse(responseCode = "200", description = "Возврат объекта по id")
-    @ApiResponse(responseCode = "404", description = "Если объект не найден")
+    @ApiResponse(responseCode = "200",
+            description = "Возврат объекта по id",
+            content = @Content(mediaType = "application/json",
+                    schema = @Schema(implementation = HotelModel.class))
+    )
+    @ApiResponse(responseCode = "404",
+            description = "Если объект не найден",
+            content = @Content(mediaType = "application/json",
+                    schema = @Schema(implementation = Response.class)
+            ))
     @GetMapping("/{id}")
     public ResponseEntity<?> getHotelById(@PathVariable("id") Long id) {
         HotelModel byId = service.getById(id);
@@ -43,15 +58,26 @@ public class HotelRestController {
     }
 
     @Operation(summary = "Создание нового отеля")
-    @ApiResponse(responseCode = "201", description = "При создании")
+    @ApiResponse(responseCode = "201",
+            description = "При успешном создании",
+            content = @Content(mediaType = "application/json",
+                    schema = @Schema(implementation = HotelModel.class)))
     @PostMapping
     public ResponseEntity<?> createHotel(@RequestBody HotelModel model) {
         return ResponseEntity.status(HttpStatus.CREATED).body(service.create(model));
     }
 
     @Operation(summary = "Обновление данных отеля по id")
-    @ApiResponse(responseCode = "200", description = "Возврат объекта")
-    @ApiResponse(responseCode = "404", description = "Если объект не найден по id")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200",
+                    description = "Возврат объекта",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = HotelModel.class))),
+            @ApiResponse(responseCode = "404",
+                    description = "Если hotel не найден по id",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = Response.class)))
+    })
     @PutMapping("/{id}")
     public ResponseEntity<?> updateHotel(@PathVariable("id") Long id, @RequestBody HotelModel model) {
         model.setId(id);
@@ -59,8 +85,14 @@ public class HotelRestController {
     }
 
     @Operation(summary = "Удаление отеля по id")
-    @ApiResponse(responseCode = "204", description = "После удаления")
-    @ApiResponse(responseCode = "404", description = "Если объект не найден по id")
+    @ApiResponses({
+            @ApiResponse(responseCode = "204",
+                    description = "После удаления отеля"),
+            @ApiResponse(responseCode = "404",
+                    description = "Если hotel не найден по id",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = Response.class)))
+    })
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteHotelById(@PathVariable("id") Long id) {
         service.delete(id);
