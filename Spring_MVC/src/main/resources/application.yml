@@ -21,13 +21,13 @@ spring:
     hibernate:
       ddl-auto: none
   liquibase:
-      change-log: classpath:db/changelog/db.changelog-master.yaml
-      enabled: true
-      drop-first: false
+    change-log: classpath:db/changelog/db.changelog-master.yaml
+    enabled: true
+    drop-first: false
 #  main:
 #    allow-bean-definition-overriding: true
-#springdoc:
-#  api-docs:
-#    path: /api-docs
-#  swagger-ui:
-#    path: /swa-ui.html
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /docs
