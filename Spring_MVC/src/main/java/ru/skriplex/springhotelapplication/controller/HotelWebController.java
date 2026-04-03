@@ -17,7 +17,7 @@ import ru.skriplex.springhotelapplication.service.HotelService;
 @Controller
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/hotels")
-@Tag(name = "WebController",description = "WEB-версияm")
+@Tag(name = "WebController",description = "WEB-версия")
 public class HotelWebController {
 
     private final HotelService service;
