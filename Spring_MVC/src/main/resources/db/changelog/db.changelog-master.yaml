@@ -1,0 +1,5 @@
+databaseChangeLog:
+  - include:
+      author: AlexeySkripnichenko
+      file: db/changelog/create_hotel_table.sql
+      relativeToChangelogFile: false
