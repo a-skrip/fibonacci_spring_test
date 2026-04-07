@@ -16,8 +16,8 @@ server:
   port: 8080
 
 # springdoc OpenAPI UI
-springdoc:
-  api-docs:
-    path: /v3/api-docs
-  swagger-ui:
-    path: /docs
+#springdoc:
+#  api-docs:
+#    path: /v3/api-docs
+#  swagger-ui:
+#    path: /docs

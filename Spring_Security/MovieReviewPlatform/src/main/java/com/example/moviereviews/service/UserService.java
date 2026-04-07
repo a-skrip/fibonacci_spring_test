@@ -5,6 +5,7 @@ import com.example.moviereviews.dto.requests.RegisterUserRequest;
 import com.example.moviereviews.enums.Role;
 import com.example.moviereviews.exception.NotFoundException;
 import com.example.moviereviews.repository.UserRepository;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -14,9 +15,11 @@ import java.util.UUID;
 public class UserService {
 
     private final UserRepository users;
+    private final PasswordEncoder passwordEncoder;
 
-    public UserService(UserRepository users) {
+    public UserService(UserRepository users, PasswordEncoder passwordEncoder) {
         this.users = users;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Transactional
@@ -29,7 +32,10 @@ public class UserService {
         u.setId(UUID.randomUUID());
         // NOTE: not hashing here; replace with encoder once Security is added
         u.setUsername(req.getUsername().trim());
-        u.setPassword(req.getPassword());
+
+
+        String encodePassword = passwordEncoder.encode(req.getPassword());
+        u.setPassword(encodePassword);
         u.setDisplayName(req.getDisplayName().trim());
         u.setRole(Role.ROLE_USER);
         return users.save(u);
