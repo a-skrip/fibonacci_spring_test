@@ -1,5 +1,6 @@
 package com.example.moviereviews.domain;
 
+import com.example.moviereviews.enums.Role;
 import jakarta.persistence.*;
 
 import java.time.OffsetDateTime;
@@ -23,6 +24,10 @@ public class User {
 
     @Column(name = "created_at", nullable = false)
     private OffsetDateTime createdAt;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "role", nullable = false)
+    private Role role = Role.ROLE_USER;
 
     @PrePersist
     void prePersist() {
@@ -72,5 +77,13 @@ public class User {
 
     public void setCreatedAt(OffsetDateTime createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public Role getRole() {
+        return role;
+    }
+
+    public void setRole(Role role) {
+        this.role = role;
     }
 }

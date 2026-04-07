@@ -5,11 +5,12 @@ spring:
     password: moviereviews
   jpa:
     hibernate:
-      ddl-auto: validate
+      ddl-auto: none
     properties:
       hibernate.format_sql: true
   flyway:
     enabled: true
+    baseline-on-migrate: true
 
 server:
   port: 8080

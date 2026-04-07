@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
 import java.util.Map;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/users")
@@ -35,5 +36,9 @@ public class UserController {
                         "displayName", u.getDisplayName(),
                         "createdAt", u.getCreatedAt()
                 ));
+    }
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getUserById(@PathVariable UUID id) {
+        return ResponseEntity.ok().body(userService.getOrThrow(id));
     }
 }

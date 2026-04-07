@@ -2,6 +2,7 @@ package com.example.moviereviews.service;
 
 import com.example.moviereviews.domain.User;
 import com.example.moviereviews.dto.requests.RegisterUserRequest;
+import com.example.moviereviews.enums.Role;
 import com.example.moviereviews.exception.NotFoundException;
 import com.example.moviereviews.repository.UserRepository;
 import org.springframework.stereotype.Service;
@@ -30,6 +31,7 @@ public class UserService {
         u.setUsername(req.getUsername().trim());
         u.setPassword(req.getPassword());
         u.setDisplayName(req.getDisplayName().trim());
+        u.setRole(Role.ROLE_USER);
         return users.save(u);
     }
 
