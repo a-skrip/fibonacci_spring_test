@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/moviereviews
+    url: jdbc:postgresql://localhost:5433/moviereviews
     username: moviereviews
     password: moviereviews
   jpa:
