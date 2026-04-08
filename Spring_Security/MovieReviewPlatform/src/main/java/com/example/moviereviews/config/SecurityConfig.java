@@ -5,6 +5,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -48,16 +49,18 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        // Публичные эндпоинты
-                        .requestMatchers("/api/users/register").permitAll()
-                        // Swagger UI и OpenAPI
-                        .requestMatchers("/swagger-ui/**","/v3/api-docs/**").permitAll()
+                                // Публичные эндпоинты
+                                .requestMatchers("/api/users/register").permitAll()
+                                // Swagger UI и OpenAPI
+                                .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
 //                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
-                        .anyRequest().authenticated()
+                                .anyRequest().authenticated()
                 )
+                .passwordManagement(Customizer.withDefaults())
                 .sessionManagement(
                         session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .httpBasic(httpBasic -> {})
+                .httpBasic(httpBasic -> {
+                })
                 .authenticationProvider(authenticationProvider());
 
         return http.build();

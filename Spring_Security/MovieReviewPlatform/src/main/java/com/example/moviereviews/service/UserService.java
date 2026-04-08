@@ -2,13 +2,16 @@ package com.example.moviereviews.service;
 
 import com.example.moviereviews.domain.User;
 import com.example.moviereviews.dto.requests.RegisterUserRequest;
+import com.example.moviereviews.dto.requests.UpdateUserPasswordRequest;
 import com.example.moviereviews.enums.Role;
 import com.example.moviereviews.exception.NotFoundException;
+import com.example.moviereviews.exception.PasswordUncorectedException;
 import com.example.moviereviews.repository.UserRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -52,13 +55,33 @@ public class UserService {
         return users.save(u);
     }
 
+//    @Transactional
+//    public User updatePassword(UserDetails currentUser, String password) {
+//        User user = users.findByUsername(currentUser.getUsername())
+//                .orElseThrow(() -> new NotFoundException("User not found: "));
+//        String encode = passwordEncoder.encode(password);
+//        user.setPassword(encode);
+//
+//        return users.save(user);
+//    }
+
+    public User updatePassword(UserDetails userDetails, UpdateUserPasswordRequest request) {
+        User user = users.findByUsername(userDetails.getUsername())
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        if (!passwordEncoder.matches(request.getOldPassword(), user.getPassword())) {
+            throw new PasswordUncorectedException("Current password is incorrect");
+        }
+        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        return users.save(user);
+    }
+
     @Transactional(readOnly = true)
     public User getOrThrow(UUID id) {
         return users.findById(id).orElseThrow(() -> new NotFoundException("User not found: " + id));
     }
 
     @Transactional(readOnly = true)
-    public User geByName(String name) {
+    public User getByName(String name) {
         return users.findByUsername(name).orElseThrow(() -> new NotFoundException("User not found: " + name));
     }
 }
