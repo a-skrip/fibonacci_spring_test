@@ -31,13 +31,14 @@ public class MovieController {
 
     @GetMapping
     @Operation(summary = "List movies (paged)")
-    @PreAuthorize("hasRole('ROLE_USER')")
+    @PreAuthorize("hasAnyRole('ROLE_USER','ROLE_ADMIN')")
     public Page<MovieDto> list(Pageable pageable) {
         return movieService.list(pageable);
     }
 
     @GetMapping("/{id}")
     @Operation(summary = "Get a movie by id")
+    @PreAuthorize("hasAnyRole('ROLE_USER','ROLE_ADMIN')")
     public MovieDto get(@PathVariable UUID id) {
         return movieService.get(id);
     }
