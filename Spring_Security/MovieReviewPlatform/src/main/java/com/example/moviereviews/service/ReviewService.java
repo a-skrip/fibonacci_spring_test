@@ -85,10 +85,16 @@ public class ReviewService {
 
     @Transactional
     public void delete(UUID currentUserId, UUID reviewId) {
-        Review r = reviews.findById(reviewId).orElseThrow(() -> new NotFoundException("Review not found: " + reviewId));
+        Review r = reviews.findById(reviewId).orElseThrow(() -> new NotFoundException("Review не найдено по id: " + reviewId));
         if (!r.getUser().getId().equals(currentUserId)) {
             throw new ForbiddenException("Вы не являетесь владельцем этого обзора");
         }
+        reviews.deleteById(reviewId);
+    }
+
+    @Transactional
+    public void deleteAsAdmin(UUID reviewId) {
+        Review r = reviews.findById(reviewId).orElseThrow(() -> new NotFoundException("Review not found: " + reviewId));
         reviews.deleteById(reviewId);
     }
 

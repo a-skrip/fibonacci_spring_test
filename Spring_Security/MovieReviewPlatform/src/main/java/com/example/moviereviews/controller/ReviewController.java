@@ -1,8 +1,10 @@
 package com.example.moviereviews.controller;
 
+import com.example.moviereviews.domain.User;
 import com.example.moviereviews.dto.ReviewDto;
 import com.example.moviereviews.dto.requests.CreateReviewRequest;
 import com.example.moviereviews.dto.requests.UpdateReviewRequest;
+import com.example.moviereviews.enums.Role;
 import com.example.moviereviews.service.ReviewService;
 import com.example.moviereviews.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -34,7 +36,7 @@ public class ReviewController {
 
     @GetMapping("/api/movies/{movieId}/reviews")
     @Operation(summary = "List reviews for a movie (paged)")
-    @PreAuthorize("hasAnyRole('ROLE_USER')")
+    @PreAuthorize("hasRole('ROLE_USER')")
     public Page<ReviewDto> listByMovie(@PathVariable UUID movieId, Pageable pageable) {
         return reviewService.listByMovie(movieId, pageable);
     }
@@ -47,7 +49,7 @@ public class ReviewController {
 
     @PostMapping("/api/reviews")
     @Operation(summary = "Create a review")
-    @PreAuthorize("hasAnyRole('ROLE_USER')")
+    @PreAuthorize("hasRole('ROLE_USER')")
     public ResponseEntity<ReviewDto> create(@AuthenticationPrincipal UserDetails currentUser,
                                             @Parameter(description = "Optional current user id (temporary demo). Will be replaced by Security.")
                                             @RequestBody CreateReviewRequest req) {
@@ -59,7 +61,7 @@ public class ReviewController {
 
     @PutMapping("/api/reviews/{reviewId}")
     @Operation(summary = "Update a review (owner only)")
-    @PreAuthorize("hasAnyRole('ROLE_USER')")
+    @PreAuthorize("hasRole('ROLE_USER')")
     public ReviewDto update(@AuthenticationPrincipal UserDetails currentUser,
                             @PathVariable UUID reviewId,
                             @RequestBody UpdateReviewRequest req) {
@@ -69,10 +71,19 @@ public class ReviewController {
 
     @DeleteMapping("/api/reviews/{reviewId}")
     @Operation(summary = "Delete a review (owner only)")
+    @PreAuthorize("hasAnyRole('USER','ADMIN')")
     public ResponseEntity<Void> delete(@AuthenticationPrincipal UserDetails currentUser,
                                        @PathVariable UUID reviewId) {
+        User user = userService.getByName(currentUser.getUsername());
         UUID userId = userService.getByName(currentUser.getUsername()).getId();
-        reviewService.delete(userId, reviewId);
+
+        if (user.getRole().equals(Role.ROLE_ADMIN)) {
+            reviewService.deleteAsAdmin(reviewId);
+        } else {
+            reviewService.delete(user.getId(), reviewId);
+        }
         return ResponseEntity.noContent().build();
     }
+
+
 }
