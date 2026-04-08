@@ -26,6 +26,11 @@ public class ApiExceptionHandler {
         return ResponseEntity.badRequest().body(error("BAD_REQUEST", ex.getMessage()));
     }
 
+    @ExceptionHandler(MoreThanOneReviewException.class)
+    public ResponseEntity<?> handleBadRequest(MoreThanOneReviewException ex) {
+        return ResponseEntity.badRequest().body(error("BAD_REQUEST", ex.getMessage()));
+    }
+
     private Map<String, Object> error(String code, String message) {
         return Map.of(
                 "timestamp", OffsetDateTime.now().toString(),

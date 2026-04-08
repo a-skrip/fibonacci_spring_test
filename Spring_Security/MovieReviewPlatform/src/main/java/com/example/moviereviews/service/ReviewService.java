@@ -7,6 +7,7 @@ import com.example.moviereviews.dto.ReviewDto;
 import com.example.moviereviews.dto.requests.CreateReviewRequest;
 import com.example.moviereviews.dto.requests.UpdateReviewRequest;
 import com.example.moviereviews.exception.ForbiddenException;
+import com.example.moviereviews.exception.MoreThanOneReviewException;
 import com.example.moviereviews.exception.NotFoundException;
 import com.example.moviereviews.mapper.ReviewMapper;
 import com.example.moviereviews.repository.MovieRepository;
@@ -17,6 +18,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -54,6 +56,10 @@ public class ReviewService {
         User user = users.findById(currentUserId)
                 .orElseThrow(() -> new NotFoundException("User not found: " + currentUserId));
 
+        if (reviews.existsByUserIdAndMovieId(currentUserId, req.getMovieId())) {
+            throw new MoreThanOneReviewException("Не возможно добавить более одного отзыва к фильму");
+        }
+
         Review r = new Review();
         r.setMovie(movie);
         r.setUser(user);
@@ -82,7 +88,7 @@ public class ReviewService {
     public void delete(UUID currentUserId, UUID reviewId) {
         Review r = reviews.findById(reviewId).orElseThrow(() -> new NotFoundException("Review not found: " + reviewId));
         if (!r.getUser().getId().equals(currentUserId)) {
-            throw new ForbiddenException("You do not own this review");
+            throw new ForbiddenException("Вы не являетесь владельцем этого обзора");
         }
         reviews.deleteById(reviewId);
     }
