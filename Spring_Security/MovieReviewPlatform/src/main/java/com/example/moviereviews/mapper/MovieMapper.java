@@ -25,9 +25,17 @@ public class MovieMapper {
     }
 
     public static void applyUpdate(Movie m, UpdateMovieRequest req) {
-        if (req.getTitle() != null) m.setTitle(req.getTitle());
-        if (req.getYear() != null) m.setYear(req.getYear());
-        if (req.getGenres() != null) m.setGenres(req.getGenres().toArray(String[]::new));
-        if (req.getDescription() != null) m.setDescription(req.getDescription());
+        if (req.getTitle() != null) {
+            m.setTitle(req.getTitle());
+        }
+        if (req.getYear() != null) {
+            m.setYear(req.getYear());
+        }
+        if (req.getGenres() != null) {
+            m.setGenres(req.getGenres().toArray(String[]::new));
+        }
+        if (req.getDescription() != null) {
+            m.setDescription(req.getDescription());
+        }
     }
 }

@@ -1,12 +1,14 @@
 package com.example.moviereviews.service;
 
 import com.example.moviereviews.domain.User;
+import com.example.moviereviews.dto.UserDto;
 import com.example.moviereviews.dto.requests.RegisterUserRequest;
 import com.example.moviereviews.dto.requests.UpdateUserPasswordRequest;
 import com.example.moviereviews.enums.Role;
 import com.example.moviereviews.exception.NotFoundException;
 import com.example.moviereviews.exception.PasswordNotMatchException;
 import com.example.moviereviews.exception.UsernameAlreadyExistException;
+import com.example.moviereviews.mapper.UserMapper;
 import com.example.moviereviews.repository.UserRepository;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -29,7 +31,7 @@ public class UserService {
     }
 
     @Transactional
-    public User register(RegisterUserRequest req) {
+    public UserDto register(RegisterUserRequest req) {
         if (req.getUsername() == null || req.getUsername().isBlank())
             throw new IllegalArgumentException("username is required");
         if (req.getPassword() == null || req.getPassword().isBlank())
@@ -50,11 +52,11 @@ public class UserService {
         u.setPassword(encodePassword);
         u.setDisplayName(req.getDisplayName().trim());
         u.setRole(Role.ROLE_USER);
-        return users.save(u);
+        return UserMapper.toDto(users.save(u));
     }
 
     @Transactional
-    public User updatePassword(UserDetails userDetails, UpdateUserPasswordRequest request) {
+    public UserDto updatePassword(UserDetails userDetails, UpdateUserPasswordRequest request) {
         User user = users.findByUsername(userDetails.getUsername())
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
@@ -62,17 +64,20 @@ public class UserService {
         if (!matches) {
             throw new PasswordNotMatchException("Пароли не совпадают");
         }
-        return users.save(user);
+        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        return UserMapper.toDto(users.save(user));
     }
 
     @Transactional(readOnly = true)
-    public User getOrThrow(UUID id) {
-        return users.findById(id).orElseThrow(() -> new NotFoundException("User not found: " + id));
+    public UserDto getOrThrow(UUID id) {
+        return UserMapper.toDto(users.findById(id)
+                .orElseThrow(() -> new NotFoundException("User not found: " + id)));
     }
 
     @Transactional(readOnly = true)
-    public User getByName(String name) {
+    public UserDto getByName(String name) {
         String upperCase = name.toUpperCase();
-        return users.findByUsername(upperCase).orElseThrow(() -> new NotFoundException("User not found: " + name));
+        return UserMapper.toDto(users.findByUsername(upperCase)
+                .orElseThrow(() -> new NotFoundException("User not found: " + name)));
     }
 }

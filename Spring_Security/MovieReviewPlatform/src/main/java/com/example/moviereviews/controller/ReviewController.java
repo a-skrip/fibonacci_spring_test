@@ -2,6 +2,7 @@ package com.example.moviereviews.controller;
 
 import com.example.moviereviews.domain.User;
 import com.example.moviereviews.dto.ReviewDto;
+import com.example.moviereviews.dto.UserDto;
 import com.example.moviereviews.dto.requests.CreateReviewRequest;
 import com.example.moviereviews.dto.requests.UpdateReviewRequest;
 import com.example.moviereviews.enums.Role;
@@ -74,14 +75,14 @@ public class ReviewController {
     @PreAuthorize("hasAnyRole('USER','ADMIN')")
     public ResponseEntity<Void> delete(@AuthenticationPrincipal UserDetails currentUser,
                                        @PathVariable UUID reviewId) {
-        User user = userService.getByName(currentUser.getUsername());
-        UUID userId = userService.getByName(currentUser.getUsername()).getId();
+        UserDto userDto = userService.getByName(currentUser.getUsername());
 
-        if (user.getRole().equals(Role.ROLE_ADMIN)) {
+        if (userDto.getRole().equals(Role.ROLE_ADMIN)) {
             reviewService.deleteAsAdmin(reviewId);
         } else {
-            reviewService.delete(user.getId(), reviewId);
+            reviewService.delete(userDto.getId(), reviewId);
         }
+
         return ResponseEntity.noContent().build();
     }
 
