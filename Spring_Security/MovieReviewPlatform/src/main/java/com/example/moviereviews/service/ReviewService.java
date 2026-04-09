@@ -71,7 +71,7 @@ public class ReviewService {
     public ReviewDto update(UUID currentUserId, UUID reviewId, UpdateReviewRequest req) {
         Review r = reviews.findById(reviewId).orElseThrow(() -> new NotFoundException("Review not found: " + reviewId));
         if (!r.getUser().getId().equals(currentUserId)) {
-            throw new ForbiddenException("You do not own this review");
+            throw new ForbiddenException("Вы не являетесь владельцем этого обзора");
         }
         if (req.getRating() != null) {
             validate(req.getRating() >= 1 && req.getRating() <= 10, "rating must be 1..10");

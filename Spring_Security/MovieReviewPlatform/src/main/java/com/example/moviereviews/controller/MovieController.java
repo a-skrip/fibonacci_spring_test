@@ -4,7 +4,6 @@ import com.example.moviereviews.dto.MovieDto;
 import com.example.moviereviews.dto.requests.CreateMovieRequest;
 import com.example.moviereviews.dto.requests.UpdateMovieRequest;
 import com.example.moviereviews.service.MovieService;
-import com.example.moviereviews.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.data.domain.Page;
@@ -22,11 +21,9 @@ import java.util.UUID;
 public class MovieController {
 
     private final MovieService movieService;
-    private final UserService userService;
 
-    public MovieController(MovieService movieService, UserService userService) {
+    public MovieController(MovieService movieService) {
         this.movieService = movieService;
-        this.userService = userService;
     }
 
     @GetMapping

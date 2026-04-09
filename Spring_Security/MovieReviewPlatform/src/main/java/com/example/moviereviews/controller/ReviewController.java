@@ -1,6 +1,5 @@
 package com.example.moviereviews.controller;
 
-import com.example.moviereviews.domain.User;
 import com.example.moviereviews.dto.ReviewDto;
 import com.example.moviereviews.dto.UserDto;
 import com.example.moviereviews.dto.requests.CreateReviewRequest;
@@ -37,7 +36,6 @@ public class ReviewController {
 
     @GetMapping("/api/movies/{movieId}/reviews")
     @Operation(summary = "List reviews for a movie (paged)")
-    @PreAuthorize("hasRole('ROLE_USER')")
     public Page<ReviewDto> listByMovie(@PathVariable UUID movieId, Pageable pageable) {
         return reviewService.listByMovie(movieId, pageable);
     }

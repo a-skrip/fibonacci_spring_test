@@ -1,6 +1,5 @@
 package com.example.moviereviews.controller;
 
-import com.example.moviereviews.domain.User;
 import com.example.moviereviews.dto.UserDto;
 import com.example.moviereviews.dto.requests.RegisterUserRequest;
 import com.example.moviereviews.dto.requests.UpdateUserPasswordRequest;

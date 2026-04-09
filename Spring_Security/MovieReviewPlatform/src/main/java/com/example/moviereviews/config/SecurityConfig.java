@@ -3,7 +3,6 @@ package com.example.moviereviews.config;
 import com.example.moviereviews.service.CustomUserDetailsService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.Customizer;
@@ -54,10 +53,6 @@ public class SecurityConfig {
                         .requestMatchers("/api/users/register").permitAll()
                         // Swagger UI и OpenAPI
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
-//                        .requestMatchers(HttpMethod.GET, "/api/movies").hasRole("USER")
-//                        .requestMatchers(HttpMethod.POST, "/api/movies/**").hasRole("ADMIN")
-//                        .requestMatchers(HttpMethod.PUT, "/api/movies/**").hasRole("ADMIN")
-//                        .requestMatchers(HttpMethod.DELETE, "/api/movies/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )
                 .passwordManagement(Customizer.withDefaults())
