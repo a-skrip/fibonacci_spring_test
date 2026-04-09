@@ -1,7 +1,8 @@
 package com.example.moviereviews.controller;
 
-import com.example.moviereviews.dto.MovieDto;
-import com.example.moviereviews.service.MovieService;
+import com.example.moviereviews.dto.UserDto;
+import com.example.moviereviews.enums.Role;
+import com.example.moviereviews.service.UserService;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +14,7 @@ import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.time.*;
 import java.util.List;
 import java.util.UUID;
 
@@ -21,30 +23,35 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(controllers = MovieController.class)
-class MovieControllerTest {
+@WebMvcTest(controllers = UserController.class)
+public class UserControllerTest {
 
     @Autowired
     MockMvc mvc;
 
     @MockBean
-    MovieService movieService;
+    UserService userService;
 
     @Test
     @WithMockUser(roles = "USER")
-    void list_returns_page_of_movies() throws Exception {
-        MovieDto dto = new MovieDto(
-                UUID.fromString("bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"),
-                "The Matrix",
-                1999,
-                List.of("Action","Sci-Fi"),
-                "desc"
+    void return_info_of_user() throws Exception {
+        UserDto dto = new UserDto(
+                UUID.randomUUID(),
+                "xxx",
+                "000",
+                "XoX",
+                OffsetDateTime.of(LocalDate.now(), LocalTime.now(),ZoneOffset.ofHours(3)),
+                Role.ROLE_USER
         );
-        Mockito.when(movieService.list(any(Pageable.class)))
-                .thenReturn(new PageImpl<>(List.of(dto)));
+        Mockito.when(userService.getByName(any(String.class)))
+                .thenReturn(dto);
 
-        mvc.perform(get("/api/movies").accept(MediaType.APPLICATION_JSON))
+        mvc.perform(get("/api/users/me").accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content[0].title").value("The Matrix"));
+                .andExpect(jsonPath("$.username").value("xxx"))
+                .andExpect(jsonPath("$.displayName").value("XoX"))
+                .andExpect(jsonPath("$.role").value("ROLE_USER"));
+
+
     }
 }
