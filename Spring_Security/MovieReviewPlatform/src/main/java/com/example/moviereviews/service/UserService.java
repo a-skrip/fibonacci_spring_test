@@ -5,6 +5,8 @@ import com.example.moviereviews.dto.requests.RegisterUserRequest;
 import com.example.moviereviews.dto.requests.UpdateUserPasswordRequest;
 import com.example.moviereviews.enums.Role;
 import com.example.moviereviews.exception.NotFoundException;
+import com.example.moviereviews.exception.PasswordNotMatchException;
+import com.example.moviereviews.exception.UsernameAlreadyExistException;
 import com.example.moviereviews.repository.UserRepository;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -39,7 +41,9 @@ public class UserService {
 
         //Шифруем пароль
         String encodePassword = passwordEncoder.encode(req.getPassword());
-
+        if (users.findByUsername(req.getUsername()).isPresent()) {
+            throw new UsernameAlreadyExistException("Такой пользователь уже существует");
+        }
         u.setId(UUID.randomUUID());
         u.setUsername(req.getUsername().trim());
         //Пишем в БД зашифрованный
@@ -49,11 +53,15 @@ public class UserService {
         return users.save(u);
     }
 
+    @Transactional
     public User updatePassword(UserDetails userDetails, UpdateUserPasswordRequest request) {
         User user = users.findByUsername(userDetails.getUsername())
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
-        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        boolean matches = passwordEncoder.matches(request.getOldPassword(), user.getPassword());
+        if (!matches) {
+            throw new PasswordNotMatchException("Пароли не совпадают");
+        }
         return users.save(user);
     }
 

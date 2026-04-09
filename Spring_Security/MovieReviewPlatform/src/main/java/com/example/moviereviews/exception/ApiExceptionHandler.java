@@ -31,6 +31,16 @@ public class ApiExceptionHandler {
         return ResponseEntity.badRequest().body(error("BAD_REQUEST", ex.getMessage()));
     }
 
+    @ExceptionHandler(UsernameAlreadyExistException.class)
+    public ResponseEntity<?> handleBadRequest(UsernameAlreadyExistException ex) {
+        return ResponseEntity.badRequest().body(error("BAD_REQUEST", ex.getMessage()));
+    }
+
+    @ExceptionHandler(PasswordNotMatchException.class)
+    public ResponseEntity<?> handleBadRequest(PasswordNotMatchException ex) {
+        return ResponseEntity.badRequest().body(error("BAD_REQUEST", ex.getMessage()));
+    }
+
     private Map<String, Object> error(String code, String message) {
         return Map.of(
                 "timestamp", OffsetDateTime.now().toString(),
