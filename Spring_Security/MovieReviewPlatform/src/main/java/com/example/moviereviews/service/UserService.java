@@ -45,7 +45,7 @@ public class UserService {
             throw new UsernameAlreadyExistException("Такой пользователь уже существует");
         }
         u.setId(UUID.randomUUID());
-        u.setUsername(req.getUsername().trim());
+        u.setUsername(req.getUsername().trim().toUpperCase());
         //Пишем в БД зашифрованный
         u.setPassword(encodePassword);
         u.setDisplayName(req.getDisplayName().trim());
@@ -72,6 +72,7 @@ public class UserService {
 
     @Transactional(readOnly = true)
     public User getByName(String name) {
-        return users.findByUsername(name).orElseThrow(() -> new NotFoundException("User not found: " + name));
+        String upperCase = name.toUpperCase();
+        return users.findByUsername(upperCase).orElseThrow(() -> new NotFoundException("User not found: " + name));
     }
 }

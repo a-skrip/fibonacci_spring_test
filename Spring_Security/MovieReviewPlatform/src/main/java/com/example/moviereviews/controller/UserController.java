@@ -44,7 +44,7 @@ public class UserController {
     @Operation(summary = "Get current user info")
     @PreAuthorize("hasAnyRole('ROLE_USER','ROLE_ADMIN')")
     public ResponseEntity<?> getCurrentUser(@AuthenticationPrincipal UserDetails currentUser) {
-        User user = userService.getByName(currentUser.getUsername());
+        User user = userService.getByName(currentUser.getUsername().toUpperCase());
         return ResponseEntity.ok(Map.of(
                 "id", user.getId(),
                 "username", user.getUsername(),
