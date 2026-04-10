@@ -48,7 +48,7 @@ public class ReviewController {
 
     @PostMapping("/api/reviews")
     @Operation(summary = "Create a review")
-    @PreAuthorize("hasRole('ROLE_USER')")
+    @PreAuthorize("hasRole('USER')")
     public ResponseEntity<ReviewDto> create(@AuthenticationPrincipal UserDetails currentUser,
                                             @Parameter(description = "Optional current user id (temporary demo). Will be replaced by Security.")
                                             @RequestBody CreateReviewRequest req) {

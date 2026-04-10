@@ -28,21 +28,21 @@ public class MovieController {
 
     @GetMapping
     @Operation(summary = "List movies (paged)")
-    @PreAuthorize("hasAnyRole('ROLE_USER','ROLE_ADMIN')")
+    @PreAuthorize("hasAnyRole('USER','ADMIN')")
     public Page<MovieDto> list(Pageable pageable) {
         return movieService.list(pageable);
     }
 
     @GetMapping("/{id}")
     @Operation(summary = "Get a movie by id")
-    @PreAuthorize("hasAnyRole('ROLE_USER','ROLE_ADMIN')")
+    @PreAuthorize("hasAnyRole('USER','ADMIN')")
     public MovieDto get(@PathVariable UUID id) {
         return movieService.get(id);
     }
 
     @PostMapping
     @Operation(summary = "Create a movie")
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<MovieDto> create(@RequestBody CreateMovieRequest req) {
         MovieDto dto = movieService.create(req);
         return ResponseEntity.status(HttpStatus.CREATED).body(dto);
@@ -50,14 +50,14 @@ public class MovieController {
 
     @PutMapping("/{id}")
     @Operation(summary = "Update a movie")
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     public MovieDto update(@PathVariable UUID id, @RequestBody UpdateMovieRequest req) {
         return movieService.update(id, req);
     }
 
     @DeleteMapping("/{id}")
     @Operation(summary = "Delete a movie")
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> delete(@PathVariable UUID id) {
         movieService.delete(id);
         return ResponseEntity.noContent().build();
