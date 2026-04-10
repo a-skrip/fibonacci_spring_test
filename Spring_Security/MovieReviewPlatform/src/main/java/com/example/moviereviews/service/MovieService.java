@@ -32,7 +32,8 @@ public class MovieService {
     @Transactional(readOnly = true)
     public MovieDto get(UUID id) {
         Movie m = movies.findById(id).orElseThrow(() -> new NotFoundException("Movie not found: " + id));
-        return MovieMapper.toDto(m);
+        return
+                MovieMapper.toDto(m);
     }
 
     @Transactional
