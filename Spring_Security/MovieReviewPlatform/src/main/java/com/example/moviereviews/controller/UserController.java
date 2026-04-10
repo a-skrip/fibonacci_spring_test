@@ -42,7 +42,7 @@ public class UserController {
 
     @GetMapping("/me")
     @Operation(summary = "Get current user info")
-    @PreAuthorize("hasAnyRole('ROLE_USER','ROLE_ADMIN')")
+    @PreAuthorize("hasAnyRole('USER','ADMIN')")
     public ResponseEntity<?> getCurrentUser(@AuthenticationPrincipal UserDetails currentUser) {
         UserDto userDto = userService.getByName(currentUser.getUsername());
         return ResponseEntity.ok(Map.of(
@@ -54,7 +54,7 @@ public class UserController {
     }
 
     @PutMapping("/password")
-    @PreAuthorize("hasAnyRole('ROLE_USER','ROLE_ADMIN')")
+    @PreAuthorize("hasAnyRole('USER','ADMIN')")
     public ResponseEntity<?> updatePassword(@AuthenticationPrincipal UserDetails currentUser,
                                             @RequestBody UpdateUserPasswordRequest request) {
         UserDto userDto = userService.updatePassword(currentUser, request);
