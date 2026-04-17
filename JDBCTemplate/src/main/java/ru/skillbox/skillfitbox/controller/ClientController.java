@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -84,7 +85,13 @@ public class ClientController {
             @PathVariable UUID id,
             @Parameter(description = "Обновленная информация о клиенте", required = true)
             @Valid @RequestBody ClientDto clientDto) {
-        ClientDto updatedClient = clientService.updateClient(id, clientDto);
+
+        ClientDto updatedClient = null;
+        try {
+            updatedClient = clientService.updateClient(id, clientDto);
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
         return ResponseEntity.ok(updatedClient);
     }
 
@@ -174,12 +181,16 @@ public class ClientController {
             @ApiResponse(responseCode = "404", description = "Клиент не найден")
     })
     @PatchMapping("/{id}/status")
-    public ResponseEntity<Void> updateClientStatus(
+    public ResponseEntity<String> updateClientStatus(
             @Parameter(description = "ID клиента", required = true)
             @PathVariable UUID id,
             @Parameter(description = "Новый статус (true для активного, false для неактивного)", required = true)
             @RequestParam Boolean isActive) {
-        clientService.updateClientStatus(id, isActive);
+        try {
+            clientService.updateClientStatus(id, isActive);
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        }
         return ResponseEntity.ok().build();
 
     }
