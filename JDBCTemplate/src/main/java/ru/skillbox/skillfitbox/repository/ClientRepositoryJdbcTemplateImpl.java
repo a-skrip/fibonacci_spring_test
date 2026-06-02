@@ -14,7 +14,6 @@ import ru.skillbox.skillfitbox.entity.Trainer;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -88,7 +87,7 @@ public class ClientRepositoryJdbcTemplateImpl implements ClientRepository {
                     client.getUpdatedDatetime(),
                     client.getId());
         } catch (EntityNotFoundException e) {
-            throw new EntityNotFoundException("Клиент id: " + client.getId() +  " не НАЙДЕН");
+            throw new EntityNotFoundException("Клиент id: " + client.getId() + " не НАЙДЕН");
 
         }
     }
@@ -120,11 +119,11 @@ public class ClientRepositoryJdbcTemplateImpl implements ClientRepository {
     @Override
     public List<String> findClientNamesByTrainerId(UUID trainerId) {
         String sql = """
-        SELECT CONCAT(surname, ' ', name, ' ', COALESCE(patronymic, '')) as client_name
-        FROM clients 
-        WHERE trainer_id = ? 
-        ORDER BY surname, name
-        """;
+                SELECT CONCAT(surname, ' ', name, ' ', COALESCE(patronymic, '')) as client_name
+                FROM clients
+                WHERE trainer_id = ?
+                ORDER BY surname, name
+                """;
 
         log.info("Поиск имен клиентов по тренеру: {}", trainerId);
 
@@ -194,6 +193,7 @@ public class ClientRepositoryJdbcTemplateImpl implements ClientRepository {
                 }, id);
 
         client.setServices(services);
+        log.info("Получение полной информации о клиенте с id: {}", id);
         return client;
     }
 
