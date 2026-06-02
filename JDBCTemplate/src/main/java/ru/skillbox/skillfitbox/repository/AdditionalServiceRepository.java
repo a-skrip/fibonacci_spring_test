@@ -18,9 +18,6 @@ import java.util.UUID;
 
 public interface AdditionalServiceRepository {
 
-
-
-
    AdditionalService findById(String id);
 
    List<AdditionalService> findAll();

@@ -30,10 +30,9 @@ import java.util.stream.Collectors;
 public class ClientService {
 
     private final ClientRepository clientRepository;
-//    private final TrainerRepositoryJdbcImpl trainerRepositoryJdbcImpl;
     private final TrainerRepository trainerRepository;
-    private final LockerRepositoryJdbcImpl lockerRepository;
-    private final AdditionalServiceRepositoryJdbcImpl additionalServiceRepositoryJdbcImpl;
+    private final LockerRepository lockerRepository;
+    private final AdditionalServiceRepository additionalServiceRepository;
     private final ClientMapper clientMapper;
     private final TrainerMapper trainerMapper;
     private final LockerMapper lockerMapper;
@@ -205,12 +204,12 @@ public class ClientService {
             throw new RuntimeException("Клиент с ID " + clientId + " не найден");
         }
 
-        AdditionalService service = additionalServiceRepositoryJdbcImpl.findById(serviceId);
+        AdditionalService service = additionalServiceRepository.findById(serviceId);
         if (service == null) {
             throw new RuntimeException("Услуга с ID " + serviceId + " не найдена");
         }
 
-        additionalServiceRepositoryJdbcImpl.addServiceToClient(clientId, serviceId);
+        additionalServiceRepository.addServiceToClient(clientId, serviceId);
     }
 
     /**
