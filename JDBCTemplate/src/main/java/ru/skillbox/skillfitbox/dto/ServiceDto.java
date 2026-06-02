@@ -15,5 +15,6 @@ public class ServiceDto {
     
     private String id;
     private String name;
+    private Integer price;
     private List<String> clientNames;
 }

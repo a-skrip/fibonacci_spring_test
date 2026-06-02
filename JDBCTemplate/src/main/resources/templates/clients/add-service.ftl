@@ -42,6 +42,9 @@
                                             <h6 class="card-title">${service.name}</h6>
                                             <p class="card-text">
                                                 <small class="text-muted">ID: ${service.id}</small>
+                                                <strong class="text-success">
+                                                    <i class="fas fa-ruble-sign me-1"></i>Цена:${service.price!0}₽
+                                                </strong>
                                             </p>
                                             <#if service.clientNames?has_content>
                                                 <p class="card-text">
