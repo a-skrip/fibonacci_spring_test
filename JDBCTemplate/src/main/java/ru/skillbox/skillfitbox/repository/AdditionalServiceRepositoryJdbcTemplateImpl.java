@@ -43,7 +43,11 @@ public class AdditionalServiceRepositoryJdbcTemplateImpl implements AdditionalSe
 
     @Override
     public void addServiceToClient(UUID clientId, String serviceId) {
-        String sql = "INSERT INTO client_services (client_id, service_id) VALUES (?, ?) ON CONFLICT (client_id, service_id) DO NOTHING";
+        String sql = """
+                INSERT INTO client_services (client_id, service_id)
+                VALUES (?, ?)
+                ON CONFLICT (client_id, service_id) DO NOTHING
+                """;
 
         log.info("Добавление услуги {} клиенту {}", serviceId, clientId);
 

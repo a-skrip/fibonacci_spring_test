@@ -4,6 +4,7 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.skillbox.skillfitbox.dto.ClientDetailDto;
 import ru.skillbox.skillfitbox.dto.ClientDto;
 import ru.skillbox.skillfitbox.entity.AdditionalService;
@@ -43,6 +44,7 @@ public class ClientService {
      * @param clientDto данные клиента для добавления
      * @return созданный DTO клиента
      */
+    @Transactional
     public ClientDto addClient(ClientDto clientDto) {
         Client client = clientMapper.toEntity(clientDto);
         client.setIsActive(true);
@@ -57,6 +59,7 @@ public class ClientService {
      * @param clientDto обновленные данные клиента
      * @return обновленный DTO клиента
      */
+    @Transactional
     public ClientDto updateClient(UUID id, ClientDto clientDto) {
         Client existingClient = clientRepository.findClientDetailById(id);
 
@@ -87,6 +90,7 @@ public class ClientService {
      *
      * @return список всех DTO клиентов
      */
+    @Transactional(readOnly = true)
     public List<ClientDto> getAllClients() {
         List<Client> clients = clientRepository.findAll();
         return clients.stream()
@@ -100,6 +104,7 @@ public class ClientService {
      * @param id ID клиента
      * @return DTO клиента или null если не найден
      */
+    @Transactional(readOnly = true)
     public ClientDto getClientById(UUID id) {
         Client client = clientRepository.findById(id);
         return client != null ? clientMapper.toDto(client) : null;
@@ -112,6 +117,7 @@ public class ClientService {
      * @param id ID клиента
      * @return подробный DTO клиента или null если не найден
      */
+    @Transactional
     public ClientDetailDto getClientDetailById(UUID id) {
         Client client = clientRepository.findClientDetailById(id);
         if (client == null) {
@@ -157,6 +163,7 @@ public class ClientService {
      * @param id       ID клиента
      * @param isActive новый статус активности
      */
+    @Transactional
     public void updateClientStatus(UUID id, Boolean isActive) {
         Client client = clientRepository.findClientDetailById(id);
         if (client == null) {
@@ -176,6 +183,7 @@ public class ClientService {
      * @param clientId  ID клиента
      * @param trainerId ID тренера
      */
+    @Transactional
     public void assignTrainer(UUID clientId, UUID trainerId) {
         Client client = clientRepository.findClientDetailById(clientId);
         if (client == null) {
@@ -198,6 +206,7 @@ public class ClientService {
      * @param clientId  ID клиента
      * @param serviceId ID услуги
      */
+    @Transactional
     public void addServiceToClient(UUID clientId, String serviceId) {
         Client client = clientRepository.findById(clientId);
         if (client == null) {
@@ -218,6 +227,7 @@ public class ClientService {
      * @param clientId ID клиента
      * @param lockerId ID шкафчика
      */
+    @Transactional
     public void assignLocker(UUID clientId, UUID lockerId) {
         Client client = clientRepository.findClientDetailById(clientId);
         if (client == null) {
