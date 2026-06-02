@@ -120,16 +120,22 @@ public class ClientRepositoryJdbcTemplateImpl implements ClientRepository {
     @Override
     public List<String> findClientNamesByTrainerId(UUID trainerId) {
         String sql = """
-                SELECT CONCAT(surname, ' ', name, ' ', COALESCE(patronymic, '')) as client_name
-                FROM clients WHERE trainer_id = ? ORDER BY surname, name
-                """;
-        List<String> names = new ArrayList<>();
+        SELECT CONCAT(surname, ' ', name, ' ', COALESCE(patronymic, '')) as client_name
+        FROM clients 
+        WHERE trainer_id = ? 
+        ORDER BY surname, name
+        """;
 
-        List<Client> query = jdbcTemplate.query(sql, ROW_MAPPER, trainerId);
+        log.info("Поиск имен клиентов по тренеру: {}", trainerId);
 
-        return query.stream()
-                .map(Client::getName)
-                .toList();
+        // Правильный способ - RowMapper для строки
+        return jdbcTemplate.query(sql,
+                (rs, rowNum) -> {
+                    String fullName = rs.getString("client_name");
+                    // Убираем лишние пробелы
+                    return fullName != null ? fullName.trim() : "";
+                },
+                trainerId);
     }
 
     @Override
