@@ -25,7 +25,6 @@ public class ClientRepositoryJdbcTemplateImpl implements ClientRepository {
 
     private final JdbcTemplate jdbcTemplate;
 
-
     @Override
     public Client save(Client client) {
         String sql = """
