@@ -24,6 +24,8 @@ import java.util.UUID;
 public class ClientRepositoryJdbcTemplateImpl implements ClientRepository {
 
     private final JdbcTemplate jdbcTemplate;
+    private final TrainerRepository trainerRepository;
+    private final LockerRepository lockerRepository;
 
     @Override
     public Client save(Client client) {
@@ -153,6 +155,19 @@ public class ClientRepositoryJdbcTemplateImpl implements ClientRepository {
         if (client == null) {
             return null;
         }
+
+        // 2. Догружаем полные данные тренера, если есть
+        if (client.getTrainer() != null && client.getTrainer().getId() != null) {
+            Trainer fullTrainer = trainerRepository.findById(client.getTrainer().getId());
+            client.setTrainer(fullTrainer);
+        }
+
+        // 3. Догружаем полные данные шкафчика, если есть
+        if (client.getLocker() != null && client.getLocker().getId() != null) {
+            Locker fullLocker = lockerRepository.findById(client.getLocker().getId());
+            client.setLocker(fullLocker);
+        }
+
 
         // Догружаем услуги отдельным запросом
         String servicesSql = """
