@@ -1,8 +1,10 @@
 package ru.skillbox.skillfitbox.service;
 
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.skillbox.skillfitbox.dto.ClientDetailDto;
 import ru.skillbox.skillfitbox.dto.ClientDto;
 import ru.skillbox.skillfitbox.entity.AdditionalService;
@@ -12,10 +14,7 @@ import ru.skillbox.skillfitbox.entity.Trainer;
 import ru.skillbox.skillfitbox.mapper.ClientMapper;
 import ru.skillbox.skillfitbox.mapper.LockerMapper;
 import ru.skillbox.skillfitbox.mapper.TrainerMapper;
-import ru.skillbox.skillfitbox.repository.ClientRepository;
-import ru.skillbox.skillfitbox.repository.LockerRepository;
-import ru.skillbox.skillfitbox.repository.AdditionalServiceRepository;
-import ru.skillbox.skillfitbox.repository.TrainerRepository;
+import ru.skillbox.skillfitbox.repository.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,10 +40,11 @@ public class ClientService {
 
     /**
      * Добавляет нового клиента в систему.
-     * 
+     *
      * @param clientDto данные клиента для добавления
      * @return созданный DTO клиента
      */
+    @Transactional
     public ClientDto addClient(ClientDto clientDto) {
         Client client = clientMapper.toEntity(clientDto);
         client.setIsActive(true);
@@ -54,32 +54,43 @@ public class ClientService {
 
     /**
      * Обновляет информацию о клиенте.
-     * 
-     * @param id ID клиента
+     *
+     * @param id        ID клиента
      * @param clientDto обновленные данные клиента
      * @return обновленный DTO клиента
      */
+    @Transactional
     public ClientDto updateClient(UUID id, ClientDto clientDto) {
         Client existingClient = clientRepository.findClientDetailById(id);
+
         if (existingClient == null) {
-            throw new RuntimeException("Клиент с ID " + id + " не найден");
+            throw new EntityNotFoundException();
         }
-        
         clientDto.setId(id);
         Client client = clientMapper.toEntity(clientDto);
-        client.setServices(existingClient.getServices());
-        client.setLocker(existingClient.getLocker());
-        client.setTrainer(existingClient.getTrainer());
-        client.setCreatedDatetime(existingClient.getCreatedDatetime());
-        Client updatedClient = clientRepository.update(client);
-        return clientMapper.toDto(updatedClient);
+
+        Client updatedClient = new Client();
+
+        try {
+            client.setServices(existingClient.getServices() != null ? existingClient.getServices() : List.of());
+            client.setLocker(existingClient.getLocker() != null ? existingClient.getLocker() : new Locker());
+            client.setTrainer(existingClient.getTrainer() != null ? existingClient.getTrainer() : new Trainer());
+            client.setCreatedDatetime(existingClient.getCreatedDatetime());
+            updatedClient = clientRepository.update(client);
+            return clientMapper.toDto(updatedClient);
+
+        } catch (RuntimeException e) {
+            return new ClientDto();
+        }
     }
+
 
     /**
      * Получает всех клиентов.
-     * 
+     *
      * @return список всех DTO клиентов
      */
+    @Transactional(readOnly = true)
     public List<ClientDto> getAllClients() {
         List<Client> clients = clientRepository.findAll();
         return clients.stream()
@@ -89,10 +100,11 @@ public class ClientService {
 
     /**
      * Получает краткую информацию о клиенте по ID.
-     * 
+     *
      * @param id ID клиента
      * @return DTO клиента или null если не найден
      */
+    @Transactional(readOnly = true)
     public ClientDto getClientById(UUID id) {
         Client client = clientRepository.findById(id);
         return client != null ? clientMapper.toDto(client) : null;
@@ -101,10 +113,11 @@ public class ClientService {
     /**
      * Получает подробную информацию о клиенте по ID включая тренера, услуги и шкафчик.
      * Использует один SQL-запрос с JOIN для оптимизации производительности.
-     * 
+     *
      * @param id ID клиента
      * @return подробный DTO клиента или null если не найден
      */
+    @Transactional
     public ClientDetailDto getClientDetailById(UUID id) {
         Client client = clientRepository.findClientDetailById(id);
         if (client == null) {
@@ -146,36 +159,42 @@ public class ClientService {
 
     /**
      * Активирует или деактивирует клиента.
-     * 
-     * @param id ID клиента
+     *
+     * @param id       ID клиента
      * @param isActive новый статус активности
      */
+    @Transactional
     public void updateClientStatus(UUID id, Boolean isActive) {
         Client client = clientRepository.findClientDetailById(id);
         if (client == null) {
-            throw new RuntimeException("Клиент с ID " + id + " не найден");
+            log.error("Клиент  не найден");
         }
-        client.setIsActive(isActive);
+        try {
+            client.setIsActive(isActive);
+        } catch (RuntimeException e) {
+            log.warn("Клиент с id {} не найден", id);
+        }
         clientRepository.update(client);
     }
 
     /**
      * Назначает тренера клиенту.
-     * 
-     * @param clientId ID клиента
+     *
+     * @param clientId  ID клиента
      * @param trainerId ID тренера
      */
+    @Transactional
     public void assignTrainer(UUID clientId, UUID trainerId) {
         Client client = clientRepository.findClientDetailById(clientId);
         if (client == null) {
             throw new RuntimeException("Клиент с ID " + clientId + " не найден");
         }
-        
+
         Trainer trainer = trainerRepository.findById(trainerId);
         if (trainer == null) {
             throw new RuntimeException("Тренер с ID " + trainerId + " не найден");
         }
-        
+
         client.setTrainer(trainer);
 
         clientRepository.update(client);
@@ -183,41 +202,43 @@ public class ClientService {
 
     /**
      * Добавляет дополнительную услугу клиенту.
-     * 
-     * @param clientId ID клиента
+     *
+     * @param clientId  ID клиента
      * @param serviceId ID услуги
      */
+    @Transactional
     public void addServiceToClient(UUID clientId, String serviceId) {
         Client client = clientRepository.findById(clientId);
         if (client == null) {
             throw new RuntimeException("Клиент с ID " + clientId + " не найден");
         }
-        
+
         AdditionalService service = additionalServiceRepository.findById(serviceId);
         if (service == null) {
             throw new RuntimeException("Услуга с ID " + serviceId + " не найдена");
         }
-        
+
         additionalServiceRepository.addServiceToClient(clientId, serviceId);
     }
 
     /**
      * Назначает шкафчик клиенту.
-     * 
+     *
      * @param clientId ID клиента
      * @param lockerId ID шкафчика
      */
+    @Transactional
     public void assignLocker(UUID clientId, UUID lockerId) {
         Client client = clientRepository.findClientDetailById(clientId);
         if (client == null) {
             throw new RuntimeException("Клиент с ID " + clientId + " не найден");
         }
-        
+
         Locker locker = lockerRepository.findById(lockerId);
         if (locker == null) {
             throw new RuntimeException("Шкафчик с ID " + lockerId + " не найден");
         }
-        
+
         if (locker.getClient() != null && locker.getClient().getId() != null) {
             if (Objects.equals(clientId, locker.getClient().getId())) {
                 log.info("Шкафчик уже занят данным клиентом - ничего не делаем");
@@ -225,13 +246,13 @@ public class ClientService {
             }
             throw new RuntimeException("Шкафчик уже занят");
         }
-        
+
         // Удаляем предыдущее назначение шкафчика если существует
         if (client.getLocker() != null) {
             client.getLocker().setClient(null);
             lockerRepository.update(client.getLocker());
         }
-        
+
         client.setLocker(locker);
         locker.setClient(client);
 

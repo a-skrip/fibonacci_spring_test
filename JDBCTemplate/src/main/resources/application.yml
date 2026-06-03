@@ -2,6 +2,17 @@ spring:
   application:
     name: skillfitbox
 
+  datasource:
+    url: jdbc:postgresql://localhost:5434/postgres
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+
+  #Migration
+  flyway:
+    enabled: true
+
+
   # FreeMarker Configuration
   freemarker:
     template-loader-path: classpath:/templates/
@@ -10,6 +21,7 @@ spring:
     charset: UTF-8
     check-template-location: true
     content-type: text/html
+
 
 server:
   port: 8090

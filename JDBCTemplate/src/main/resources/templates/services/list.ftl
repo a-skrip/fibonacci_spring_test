@@ -17,6 +17,9 @@
                             </h5>
                             <p class="card-text">
                                 <small class="text-muted">ID: ${service.id}</small>
+                                <strong class="text-success">
+                                    Цена: ${service.price!0}₽
+                                </strong>
                             </p>
                             <#if service.clientNames?has_content>
                                 <h6>Клиенты:</h6>
@@ -42,7 +45,7 @@
                 </div>
             </#list>
         </div>
-        
+
         <div class="row mt-4">
             <div class="col-md-6">
                 <div class="card">
@@ -51,7 +54,7 @@
                             <i class="fas fa-chart-pie me-2"></i>Статистика
                         </h5>
                         <p><strong>Всего услуг:</strong> ${services?size}</p>
-                        <p><strong>Всего подключений:</strong> 
+                        <p><strong>Всего подключений:</strong>
                             <#list services as service>
                                 ${(service.clientNames?size)!0}<#if service_has_next> + </#if>
                             </#list>

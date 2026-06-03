@@ -16,6 +16,7 @@ public class AdditionalService {
     
     private String id;
     private String name;
+    private Integer price;
     private LocalDateTime createdDatetime;
     private LocalDateTime updatedDatetime;
 
