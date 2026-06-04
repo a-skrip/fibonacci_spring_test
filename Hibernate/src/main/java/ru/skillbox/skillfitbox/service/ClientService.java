@@ -32,7 +32,7 @@ public class ClientService {
     private final ClientRepository clientRepository;
     private final TrainerRepository trainerRepository;
     private final LockerRepository lockerRepository;
-    private final AdditionalServiceRepository additionalServiceRepository;
+    private final AdditionalServiceRepositoryImpl additionalServiceRepository;
     private final ClientMapper clientMapper;
     private final TrainerMapper trainerMapper;
     private final LockerMapper lockerMapper;
@@ -69,6 +69,7 @@ public class ClientService {
         client.setLocker(existingClient.getLocker());
         client.setTrainer(existingClient.getTrainer());
         client.setCreatedDatetime(existingClient.getCreatedDatetime());
+
         Client updatedClient = clientRepository.update(client);
         return clientMapper.toDto(updatedClient);
     }
@@ -188,11 +189,16 @@ public class ClientService {
         Client client = clientRepository.findById(clientId)
                 .orElseThrow(() -> new RuntimeException("Клиент с ID " + clientId + " не найден"));
 
-        AdditionalService service = additionalServiceRepository.findById(serviceId);
-        if (service == null) {
-            throw new RuntimeException("Услуга с ID " + serviceId + " не найдена");
+        AdditionalService service = additionalServiceRepository.findById(serviceId)
+                .orElseThrow(() -> new RuntimeException("Услуга с ID " + serviceId + " не найдена"));
+
+        boolean alreadyHasService = client.getServices().stream()
+                .anyMatch(s -> s.getId().equals(serviceId));
+
+        if (alreadyHasService) {
+            log.warn("Услуга {} уже добавлена клиенту {}", serviceId, clientId);
+            return;
         }
-        
         additionalServiceRepository.addServiceToClient(clientId, serviceId);
     }
 

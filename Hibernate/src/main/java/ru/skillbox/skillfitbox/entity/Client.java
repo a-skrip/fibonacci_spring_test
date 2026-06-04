@@ -65,4 +65,6 @@ public class Client {
             inverseJoinColumns = @JoinColumn(name = "service_id")
     )
     private List<AdditionalService> services;
+
+
 }

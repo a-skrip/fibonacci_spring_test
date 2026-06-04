@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.skillbox.skillfitbox.dto.LockerDto;
 import ru.skillbox.skillfitbox.mapper.LockerMapper;
-import ru.skillbox.skillfitbox.repository.LockerRepositoryImpl;
+import ru.skillbox.skillfitbox.repository.LockerRepository;
 
 import java.util.List;
 
@@ -15,12 +15,12 @@ import java.util.List;
 @RequiredArgsConstructor
 public class LockerService {
 
-    private final LockerRepositoryImpl lockerRepository;
+    private final LockerRepository lockerRepository;
     private final LockerMapper lockerMapper;
 
     /**
      * Получает информацию о всех шкафчиках включая полные имена клиентов.
-     * 
+     *
      * @return список DTO шкафчиков с информацией о клиентах
      */
     public List<LockerDto> getAllLockersWithClientInfo() {
