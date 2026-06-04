@@ -1,6 +1,12 @@
 spring:
   application:
     name: skillfitbox
+  datasource:
+    url: jdbc:postgresql://localhost:5434/postgres
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+
   # FreeMarker Configuration
   freemarker:
     template-loader-path: classpath:/templates/
@@ -10,6 +16,7 @@ spring:
     check-template-location: true
     content-type: text/html
   jpa:
+    open-in-view: false
     hibernate:
       ddl-auto: validate
     show-sql: true
@@ -17,7 +24,7 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: true
-        open-in-view: false
+
 
 
 server:
