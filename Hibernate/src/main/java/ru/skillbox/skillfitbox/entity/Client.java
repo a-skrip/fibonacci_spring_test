@@ -7,7 +7,9 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 @Getter
@@ -64,7 +66,7 @@ public class Client {
             joinColumns = @JoinColumn(name = "client_id"),
             inverseJoinColumns = @JoinColumn(name = "service_id")
     )
-    private List<AdditionalService> services;
+    private Set<AdditionalService> services = new HashSet<>();
 
 
 }

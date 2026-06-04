@@ -9,7 +9,9 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -36,5 +38,5 @@ public class AdditionalService {
 
 
     @ManyToMany(mappedBy = "services", fetch = FetchType.LAZY)  // ← mappedBy!
-    private List<Client> clients /*= new ArrayList<>()*/;
+    private Set<Client> clients = new HashSet<>();
 }

@@ -22,7 +22,7 @@ public class ClientRepositoryImpl implements ClientRepository {
 
     @Override
     public Client save(Client client) {
-        log.info("Вызов метода save для Client {}", client.toString());
+        log.info("Вызов метода save для Client: {}", client.getId());
         em.persist(client);
         return client;
 
@@ -30,7 +30,7 @@ public class ClientRepositoryImpl implements ClientRepository {
 
     @Override
     public Client update(Client client) {
-        log.info("Вызов метода update для id {}", client.getId());
+        log.info("Вызов метода update для Client: {}", client.getId());
 
         em.merge(client);
 
