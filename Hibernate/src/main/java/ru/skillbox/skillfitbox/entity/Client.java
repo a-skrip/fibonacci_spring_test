@@ -52,8 +52,9 @@ public class Client {
     @Column(name = "updated_datetime")
     private LocalDateTime updatedDatetime;
 
+    // ВЛАДЕЮЩАЯ сторона - здесь должен быть внешний ключ!
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "locker_id", unique = true)
+    @JoinColumn(name = "locker_id", unique = true)  // ← имя колонки в БД
     private Locker locker;
 
     @ManyToOne(fetch = FetchType.LAZY)

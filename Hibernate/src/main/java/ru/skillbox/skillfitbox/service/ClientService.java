@@ -1,7 +1,9 @@
 package ru.skillbox.skillfitbox.service;
 
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.Hibernate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.skillbox.skillfitbox.dto.ClientDetailDto;
@@ -216,31 +218,43 @@ public class ClientService {
      */
     @Transactional
     public void assignLocker(UUID clientId, UUID lockerId) {
-        Client client = clientRepository.findClientDetailById(clientId)
-                .orElseThrow(() -> new RuntimeException("Клиент с ID " + clientId + " не найден"));
+        log.info("Назначение шкафчика {} клиенту {}", lockerId, clientId);
+
+        // Загружаем сущности
+        Client client = clientRepository.findById(clientId)
+                .orElseThrow(() -> new RuntimeException("Клиент не найден"));
 
         Locker locker = lockerRepository.findById(lockerId)
-                .orElseThrow(() -> new RuntimeException("Шкафчик с ID " + lockerId + " не найден"));
+                .orElseThrow(() -> new RuntimeException("Шкафчик не найден"));
 
-
-        if (locker.getClient() != null && locker.getClient().getId() != null) {
-            if (Objects.equals(clientId, locker.getClient().getId())) {
-                log.info("Шкафчик уже занят данным клиентом - ничего не делаем");
-                return;
-            }
-            throw new RuntimeException("Шкафчик уже занят");
+        // ВАЖНО: Проверяем, не занят ли шкафчик (нужно инициализировать LAZY поле)
+        if (locker.getClient() != null && !locker.getClient().getId().equals(clientId)) {
+            throw new RuntimeException("Шкафчик уже занят другим клиентом");
         }
 
-        // Удаляем предыдущее назначение шкафчика если существует
+        // Проверка: не пытаемся ли назначить тот же шкафчик
+        if (client.getLocker() != null && client.getLocker().getId().equals(lockerId)) {
+            log.info("У клиента уже назначен этот шкафчик");
+            return;
+        }
+
+        // Освобождаем старый шкафчик (если был)
         if (client.getLocker() != null) {
-            client.getLocker().setClient(null);
-            lockerRepository.update(client.getLocker());
+            Locker oldLocker = client.getLocker();
+            oldLocker.setClient(null);  // Разрываем связь в обратной стороне
+            // Не нужно вызывать update!
         }
 
-        client.setLocker(locker);
-        locker.setClient(client);
+        // КРИТИЧНО: Синхронизируем ОБЕ стороны!
+        client.setLocker(locker);  // Устанавливаем связь с клиента
+        locker.setClient(client);   // Устанавливаем обратную связь (ВАЖНО!)
 
-        clientRepository.update(client);
-        lockerRepository.update(locker);
+        // После этого Hibernate сам выполнит:
+        // UPDATE clients SET locker_id = ? WHERE id = ?
+
+        log.info("Шкафчик {} назначен клиенту {}", locker.getNumber(), client.getSurname());
+
+        // НЕ вызывайте clientRepository.update(client) - это лишнее!
+        // Hibernate автоматически сохранит изменения в конце транзакции
     }
 }

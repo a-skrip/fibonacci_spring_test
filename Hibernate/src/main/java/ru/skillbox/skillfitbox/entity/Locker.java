@@ -34,6 +34,7 @@ public class Locker {
     @Column(name = "updated_datetime")
     private LocalDateTime updatedDatetime;
 
+    // ОБРАТНАЯ сторона - НЕТ @JoinColumn!
     @OneToOne(mappedBy = "locker", fetch = FetchType.LAZY)
     private Client client;
 }
