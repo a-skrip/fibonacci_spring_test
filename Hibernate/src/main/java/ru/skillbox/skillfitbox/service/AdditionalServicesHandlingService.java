@@ -6,7 +6,8 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.skillbox.skillfitbox.dto.ServiceDto;
 import ru.skillbox.skillfitbox.entity.AdditionalService;
 import ru.skillbox.skillfitbox.mapper.ServiceMapper;
-import ru.skillbox.skillfitbox.repository.AdditionalServiceRepositoryImpl;
+import ru.skillbox.skillfitbox.repository.AdditionalServiceRepository;
+import ru.skillbox.skillfitbox.repository.impl.AdditionalServiceRepositoryImpl;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -18,7 +19,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class AdditionalServicesHandlingService {
 
-    private final AdditionalServiceRepositoryImpl additionalServiceRepository;
+    private final AdditionalServiceRepository additionalServiceRepository;
     private final ServiceMapper serviceMapper;
 
     /**

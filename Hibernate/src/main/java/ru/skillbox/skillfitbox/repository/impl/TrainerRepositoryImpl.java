@@ -1,4 +1,4 @@
-package ru.skillbox.skillfitbox.repository;
+package ru.skillbox.skillfitbox.repository.impl;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 import ru.skillbox.skillfitbox.entity.Trainer;
+import ru.skillbox.skillfitbox.repository.TrainerRepository;
 
 import java.util.List;
 import java.util.Optional;

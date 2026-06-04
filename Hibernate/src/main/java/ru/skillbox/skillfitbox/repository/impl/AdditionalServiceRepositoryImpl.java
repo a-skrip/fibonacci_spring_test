@@ -1,4 +1,4 @@
-package ru.skillbox.skillfitbox.repository;
+package ru.skillbox.skillfitbox.repository.impl;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 import ru.skillbox.skillfitbox.entity.AdditionalService;
 import ru.skillbox.skillfitbox.entity.Client;
+import ru.skillbox.skillfitbox.repository.AdditionalServiceRepository;
 
 import java.util.List;
 import java.util.Optional;
@@ -47,7 +48,7 @@ public class AdditionalServiceRepositoryImpl implements AdditionalServiceReposit
         TypedQuery<AdditionalService> query = em.createQuery(
                 "SELECT s FROM AdditionalService s " +
                 "LEFT JOIN FETCH s.clients "
-                /*"WHERE s.id = :id"*/, AdditionalService.class);
+                , AdditionalService.class);
         return query.getResultList();
     }
 

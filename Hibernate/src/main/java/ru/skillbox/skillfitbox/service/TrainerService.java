@@ -1,7 +1,6 @@
 package ru.skillbox.skillfitbox.service;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.skillbox.skillfitbox.dto.TrainerDetailDto;
@@ -10,7 +9,6 @@ import ru.skillbox.skillfitbox.entity.Trainer;
 import ru.skillbox.skillfitbox.entity.TrainerStatus;
 import ru.skillbox.skillfitbox.mapper.TrainerMapper;
 import ru.skillbox.skillfitbox.repository.TrainerRepository;
-import ru.skillbox.skillfitbox.repository.TrainerRepositoryImpl;
 
 import java.util.List;
 import java.util.UUID;
@@ -54,7 +52,6 @@ public class TrainerService {
 
         trainerDto.setId(trainerId);
         Trainer trainer = trainerMapper.toEntity(trainerDto);
-//        trainer.setCreatedDatetime(existingTrainer.getCreatedDatetime());
         Trainer updatedTrainer = trainerRepository.update(trainer);
         return trainerMapper.toDto(updatedTrainer);
     }

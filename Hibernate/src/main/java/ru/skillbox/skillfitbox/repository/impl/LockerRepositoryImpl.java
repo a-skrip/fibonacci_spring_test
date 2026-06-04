@@ -1,4 +1,4 @@
-package ru.skillbox.skillfitbox.repository;
+package ru.skillbox.skillfitbox.repository.impl;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 import ru.skillbox.skillfitbox.entity.Locker;
+import ru.skillbox.skillfitbox.repository.LockerRepository;
 
 import java.util.List;
 import java.util.Optional;
@@ -14,7 +15,7 @@ import java.util.UUID;
 @Repository
 @RequiredArgsConstructor
 @Slf4j
-public class LockerRepositoryImpl implements LockerRepository{
+public class LockerRepositoryImpl implements LockerRepository {
 
     private final EntityManager em;
 
