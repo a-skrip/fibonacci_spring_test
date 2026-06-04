@@ -1,14 +1,16 @@
 package ru.skillbox.skillfitbox.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.skillbox.skillfitbox.dto.TrainerDetailDto;
 import ru.skillbox.skillfitbox.dto.TrainerDto;
 import ru.skillbox.skillfitbox.entity.Trainer;
 import ru.skillbox.skillfitbox.entity.TrainerStatus;
 import ru.skillbox.skillfitbox.mapper.TrainerMapper;
-import ru.skillbox.skillfitbox.repository.ClientRepositoryImpl;
 import ru.skillbox.skillfitbox.repository.TrainerRepository;
+import ru.skillbox.skillfitbox.repository.TrainerRepositoryImpl;
 
 import java.util.List;
 import java.util.UUID;
@@ -21,6 +23,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class TrainerService {
 
+
     private final TrainerRepository trainerRepository;
     private final TrainerMapper trainerMapper;
 
@@ -30,6 +33,7 @@ public class TrainerService {
      * @param trainerDto данные тренера для добавления
      * @return созданный DTO тренера
      */
+    @Transactional
     public TrainerDto addTrainer(TrainerDto trainerDto) {
         Trainer trainer = trainerMapper.toEntity(trainerDto);
         Trainer savedTrainer = trainerRepository.save(trainer);
@@ -39,19 +43,18 @@ public class TrainerService {
     /**
      * Обновляет информацию о тренере.
      *
-     * @param id         ID тренера
+     * @param trainerId  ID тренера
      * @param trainerDto обновленные данные тренера
      * @return обновленный DTO тренера
      */
-    public TrainerDto updateTrainer(UUID id, TrainerDto trainerDto) {
-        Trainer existingTrainer = trainerRepository.findById(id);
-        if (existingTrainer == null) {
-            throw new RuntimeException("Тренер с ID " + id + " не найден");
-        }
+    @Transactional
+    public TrainerDto updateTrainer(UUID trainerId, TrainerDto trainerDto) {
+        Trainer existingTrainer = trainerRepository.findById(trainerId)
+                .orElseThrow(() -> new RuntimeException("Тренер с ID " + trainerId + " не найден"));
 
-        trainerDto.setId(id);
+        trainerDto.setId(trainerId);
         Trainer trainer = trainerMapper.toEntity(trainerDto);
-        trainer.setCreatedDatetime(existingTrainer.getCreatedDatetime());
+//        trainer.setCreatedDatetime(existingTrainer.getCreatedDatetime());
         Trainer updatedTrainer = trainerRepository.update(trainer);
         return trainerMapper.toDto(updatedTrainer);
     }
@@ -59,14 +62,14 @@ public class TrainerService {
     /**
      * Изменяет статус тренера.
      *
-     * @param id     ID тренера
-     * @param status новый статус
+     * @param trainerId ID тренера
+     * @param status    новый статус
      */
-    public void changeTrainerStatus(UUID id, TrainerStatus status) {
-        Trainer trainer = trainerRepository.findById(id);
-        if (trainer == null) {
-            throw new RuntimeException("Тренер с ID " + id + " не найден");
-        }
+    @Transactional
+    public void changeTrainerStatus(UUID trainerId, TrainerStatus status) {
+        Trainer trainer = trainerRepository.findById(trainerId)
+                .orElseThrow(() -> new RuntimeException("Тренер с ID " + trainerId + " не найден"));
+
         trainer.setStatus(status);
 
         trainerRepository.update(trainer);
@@ -75,26 +78,29 @@ public class TrainerService {
     /**
      * Получает тренера по ID.
      *
-     * @param id ID тренера
+     * @param trainerId ID тренера
      * @return DTO тренера или null если не найден
      */
-    public TrainerDto getTrainerById(UUID id) {
-        Trainer trainer = trainerRepository.findById(id);
-        if (trainer == null) {
-            return null;
-        }
+    @Transactional(readOnly = true)
+    public TrainerDto getTrainerById(UUID trainerId) {
+        Trainer trainer = trainerRepository.findById(trainerId)
+                .orElseThrow(() -> new RuntimeException("Тренер с ID " + trainerId + " не найден"));
+
         return trainerMapper.toDto(trainer);
     }
 
     /**
      * Получает полную информацию о тренере включая имена клиентов.
      *
-     * @param id ID тренера
+     * @param trainerId ID тренера
      * @return подробный DTO тренера или null если не найден
      */
-    public TrainerDetailDto getTrainerDetailById(UUID id) {
+    @Transactional(readOnly = true)
+    public TrainerDetailDto getTrainerDetailById(UUID trainerId) {
 
-        Trainer detailById = trainerRepository.findTrainerDetailById(id);
+        Trainer detailById = trainerRepository.findTrainerDetailById(trainerId)
+                .orElseThrow(() -> new RuntimeException("Тренер с ID " + trainerId + " не найден"));
+
         List<String> clientNames = extractClientNames(detailById);
 
         return trainerMapper.toDetailDto(detailById, clientNames);
@@ -105,6 +111,7 @@ public class TrainerService {
      *
      * @return список DTO тренеров
      */
+    @Transactional(readOnly = true)
     public List<TrainerDto> getAllTrainers() {
         List<Trainer> trainers = trainerRepository.findAll();
         return trainers.stream()

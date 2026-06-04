@@ -16,8 +16,6 @@ public interface ClientRepository {
 
     List<Client> findAll();
 
-//    List<String> findClientNamesByTrainerId(UUID trainerId);
-
     Optional<Client> findClientDetailById(UUID id);
 
 }

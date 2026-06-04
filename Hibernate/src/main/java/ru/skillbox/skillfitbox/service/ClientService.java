@@ -16,7 +16,7 @@ import ru.skillbox.skillfitbox.mapper.TrainerMapper;
 import ru.skillbox.skillfitbox.repository.ClientRepositoryImpl;
 import ru.skillbox.skillfitbox.repository.LockerRepository;
 import ru.skillbox.skillfitbox.repository.AdditionalServiceRepository;
-import ru.skillbox.skillfitbox.repository.TrainerRepository;
+import ru.skillbox.skillfitbox.repository.TrainerRepositoryImpl;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,7 +33,7 @@ import java.util.stream.Collectors;
 public class ClientService {
 
     private final ClientRepositoryImpl clientRepositoryImpl;
-    private final TrainerRepository trainerRepository;
+    private final TrainerRepositoryImpl trainerRepositoryImpl;
     private final LockerRepository lockerRepository;
     private final AdditionalServiceRepository additionalServiceRepository;
     private final ClientMapper clientMapper;
@@ -172,11 +172,9 @@ public class ClientService {
         Client client = clientRepositoryImpl.findClientDetailById(clientId)
                 .orElseThrow(() -> new RuntimeException("Клиент с ID " + clientId + " не найден"));;
 
-        Trainer trainer = trainerRepository.findById(trainerId);
-        if (trainer == null) {
-            throw new RuntimeException("Тренер с ID " + trainerId + " не найден");
-        }
-        
+        Trainer trainer = trainerRepositoryImpl.findById(trainerId)
+                .orElseThrow(() -> new RuntimeException("Тренер с ID " + trainerId + " не найден"));
+
         client.setTrainer(trainer);
 
         clientRepositoryImpl.update(client);
