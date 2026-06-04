@@ -1,6 +1,8 @@
 package ru.skillbox.skillfitbox.repository;
 
+import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
 import ru.skillbox.skillfitbox.entity.Trainer;
 import ru.skillbox.skillfitbox.entity.TrainerStatus;
@@ -17,9 +19,11 @@ import java.util.UUID;
 
 @Repository
 @RequiredArgsConstructor
+@Slf4j
 public class TrainerRepository {
 
     private final DataSource dataSource;
+    private final EntityManager em;
 
     private Trainer mapTrainer(ResultSet rs) throws SQLException {
         Trainer trainer = new Trainer();
@@ -107,5 +111,17 @@ public class TrainerRepository {
             throw new RuntimeException("Ошибка получения списка тренеров", e);
         }
         return result;
+    }
+
+    public Trainer findTrainerDetailById(UUID trainerId) {
+        Trainer trainer = em.createQuery(
+                        "SELECT DISTINCT t FROM Trainer t " +
+                                "LEFT JOIN FETCH t.clients " +
+                                "WHERE t.id = :id", Trainer.class)
+                .setParameter("id", trainerId)
+                .getSingleResult();
+
+
+        return trainer;
     }
 }

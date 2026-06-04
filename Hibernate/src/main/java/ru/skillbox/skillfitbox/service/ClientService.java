@@ -3,6 +3,7 @@ package ru.skillbox.skillfitbox.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.skillbox.skillfitbox.dto.ClientDetailDto;
 import ru.skillbox.skillfitbox.dto.ClientDto;
 import ru.skillbox.skillfitbox.entity.AdditionalService;
@@ -12,7 +13,7 @@ import ru.skillbox.skillfitbox.entity.Trainer;
 import ru.skillbox.skillfitbox.mapper.ClientMapper;
 import ru.skillbox.skillfitbox.mapper.LockerMapper;
 import ru.skillbox.skillfitbox.mapper.TrainerMapper;
-import ru.skillbox.skillfitbox.repository.ClientRepository;
+import ru.skillbox.skillfitbox.repository.ClientRepositoryImpl;
 import ru.skillbox.skillfitbox.repository.LockerRepository;
 import ru.skillbox.skillfitbox.repository.AdditionalServiceRepository;
 import ru.skillbox.skillfitbox.repository.TrainerRepository;
@@ -31,7 +32,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class ClientService {
 
-    private final ClientRepository clientRepository;
+    private final ClientRepositoryImpl clientRepositoryImpl;
     private final TrainerRepository trainerRepository;
     private final LockerRepository lockerRepository;
     private final AdditionalServiceRepository additionalServiceRepository;
@@ -45,10 +46,11 @@ public class ClientService {
      * @param clientDto данные клиента для добавления
      * @return созданный DTO клиента
      */
+    @Transactional
     public ClientDto addClient(ClientDto clientDto) {
         Client client = clientMapper.toEntity(clientDto);
         client.setIsActive(true);
-        Client savedClient = clientRepository.save(client);
+        Client savedClient = clientRepositoryImpl.save(client);
         return clientMapper.toDto(savedClient);
     }
 
@@ -59,19 +61,18 @@ public class ClientService {
      * @param clientDto обновленные данные клиента
      * @return обновленный DTO клиента
      */
+    @Transactional
     public ClientDto updateClient(UUID id, ClientDto clientDto) {
-        Client existingClient = clientRepository.findClientDetailById(id);
-        if (existingClient == null) {
-            throw new RuntimeException("Клиент с ID " + id + " не найден");
-        }
-        
+        Client existingClient = clientRepositoryImpl.findClientDetailById(id)
+                .orElseThrow(() -> new RuntimeException("Клиент с ID " + id + " не найден"));
+
         clientDto.setId(id);
         Client client = clientMapper.toEntity(clientDto);
         client.setServices(existingClient.getServices());
         client.setLocker(existingClient.getLocker());
         client.setTrainer(existingClient.getTrainer());
         client.setCreatedDatetime(existingClient.getCreatedDatetime());
-        Client updatedClient = clientRepository.update(client);
+        Client updatedClient = clientRepositoryImpl.update(client);
         return clientMapper.toDto(updatedClient);
     }
 
@@ -80,8 +81,9 @@ public class ClientService {
      * 
      * @return список всех DTO клиентов
      */
+    @Transactional(readOnly = true)
     public List<ClientDto> getAllClients() {
-        List<Client> clients = clientRepository.findAll();
+        List<Client> clients = clientRepositoryImpl.findAll();
         return clients.stream()
                 .map(clientMapper::toDto)
                 .collect(Collectors.toList());
@@ -93,8 +95,10 @@ public class ClientService {
      * @param id ID клиента
      * @return DTO клиента или null если не найден
      */
+    @Transactional(readOnly = true)
     public ClientDto getClientById(UUID id) {
-        Client client = clientRepository.findById(id);
+        Client client = clientRepositoryImpl.findById(id)
+                .orElseThrow(() -> new RuntimeException("Клиент с ID " + id + " не найден"));;
         return client != null ? clientMapper.toDto(client) : null;
     }
 
@@ -105,11 +109,10 @@ public class ClientService {
      * @param id ID клиента
      * @return подробный DTO клиента или null если не найден
      */
+    @Transactional(readOnly = true)
     public ClientDetailDto getClientDetailById(UUID id) {
-        Client client = clientRepository.findClientDetailById(id);
-        if (client == null) {
-            return null;
-        }
+        Client client = clientRepositoryImpl.findClientDetailById(id)
+                .orElseThrow(() -> new RuntimeException("Клиент с ID " + id + " не найден"));
 
         ClientDetailDto detailDto = new ClientDetailDto();
         detailDto.setId(client.getId());
@@ -150,13 +153,12 @@ public class ClientService {
      * @param id ID клиента
      * @param isActive новый статус активности
      */
+    @Transactional
     public void updateClientStatus(UUID id, Boolean isActive) {
-        Client client = clientRepository.findClientDetailById(id);
-        if (client == null) {
-            throw new RuntimeException("Клиент с ID " + id + " не найден");
-        }
+        Client client = clientRepositoryImpl.findClientDetailById(id)
+                .orElseThrow(() -> new RuntimeException("Клиент с ID " + id + " не найден"));;
         client.setIsActive(isActive);
-        clientRepository.update(client);
+        clientRepositoryImpl.update(client);
     }
 
     /**
@@ -165,12 +167,11 @@ public class ClientService {
      * @param clientId ID клиента
      * @param trainerId ID тренера
      */
+    @Transactional
     public void assignTrainer(UUID clientId, UUID trainerId) {
-        Client client = clientRepository.findClientDetailById(clientId);
-        if (client == null) {
-            throw new RuntimeException("Клиент с ID " + clientId + " не найден");
-        }
-        
+        Client client = clientRepositoryImpl.findClientDetailById(clientId)
+                .orElseThrow(() -> new RuntimeException("Клиент с ID " + clientId + " не найден"));;
+
         Trainer trainer = trainerRepository.findById(trainerId);
         if (trainer == null) {
             throw new RuntimeException("Тренер с ID " + trainerId + " не найден");
@@ -178,7 +179,7 @@ public class ClientService {
         
         client.setTrainer(trainer);
 
-        clientRepository.update(client);
+        clientRepositoryImpl.update(client);
     }
 
     /**
@@ -187,12 +188,11 @@ public class ClientService {
      * @param clientId ID клиента
      * @param serviceId ID услуги
      */
+    @Transactional
     public void addServiceToClient(UUID clientId, String serviceId) {
-        Client client = clientRepository.findById(clientId);
-        if (client == null) {
-            throw new RuntimeException("Клиент с ID " + clientId + " не найден");
-        }
-        
+        Client client = clientRepositoryImpl.findById(clientId)
+                .orElseThrow(() -> new RuntimeException("Клиент с ID " + clientId + " не найден"));
+
         AdditionalService service = additionalServiceRepository.findById(serviceId);
         if (service == null) {
             throw new RuntimeException("Услуга с ID " + serviceId + " не найдена");
@@ -207,12 +207,11 @@ public class ClientService {
      * @param clientId ID клиента
      * @param lockerId ID шкафчика
      */
+    @Transactional
     public void assignLocker(UUID clientId, UUID lockerId) {
-        Client client = clientRepository.findClientDetailById(clientId);
-        if (client == null) {
-            throw new RuntimeException("Клиент с ID " + clientId + " не найден");
-        }
-        
+        Client client = clientRepositoryImpl.findClientDetailById(clientId)
+                .orElseThrow(() -> new RuntimeException("Клиент с ID " + clientId + " не найден"));;
+
         Locker locker = lockerRepository.findById(lockerId);
         if (locker == null) {
             throw new RuntimeException("Шкафчик с ID " + lockerId + " не найден");
@@ -235,7 +234,7 @@ public class ClientService {
         client.setLocker(locker);
         locker.setClient(client);
 
-        clientRepository.update(client);
+        clientRepositoryImpl.update(client);
         lockerRepository.update(locker);
     }
 }

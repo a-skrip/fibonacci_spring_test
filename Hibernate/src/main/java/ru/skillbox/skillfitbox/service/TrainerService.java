@@ -7,8 +7,8 @@ import ru.skillbox.skillfitbox.dto.TrainerDto;
 import ru.skillbox.skillfitbox.entity.Trainer;
 import ru.skillbox.skillfitbox.entity.TrainerStatus;
 import ru.skillbox.skillfitbox.mapper.TrainerMapper;
+import ru.skillbox.skillfitbox.repository.ClientRepositoryImpl;
 import ru.skillbox.skillfitbox.repository.TrainerRepository;
-import ru.skillbox.skillfitbox.repository.ClientRepository;
 
 import java.util.List;
 import java.util.UUID;
@@ -22,12 +22,11 @@ import java.util.stream.Collectors;
 public class TrainerService {
 
     private final TrainerRepository trainerRepository;
-    private final ClientRepository clientRepository;
     private final TrainerMapper trainerMapper;
 
     /**
      * Добавляет нового тренера в систему.
-     * 
+     *
      * @param trainerDto данные тренера для добавления
      * @return созданный DTO тренера
      */
@@ -39,8 +38,8 @@ public class TrainerService {
 
     /**
      * Обновляет информацию о тренере.
-     * 
-     * @param id ID тренера
+     *
+     * @param id         ID тренера
      * @param trainerDto обновленные данные тренера
      * @return обновленный DTO тренера
      */
@@ -49,7 +48,7 @@ public class TrainerService {
         if (existingTrainer == null) {
             throw new RuntimeException("Тренер с ID " + id + " не найден");
         }
-        
+
         trainerDto.setId(id);
         Trainer trainer = trainerMapper.toEntity(trainerDto);
         trainer.setCreatedDatetime(existingTrainer.getCreatedDatetime());
@@ -59,8 +58,8 @@ public class TrainerService {
 
     /**
      * Изменяет статус тренера.
-     * 
-     * @param id ID тренера
+     *
+     * @param id     ID тренера
      * @param status новый статус
      */
     public void changeTrainerStatus(UUID id, TrainerStatus status) {
@@ -75,7 +74,7 @@ public class TrainerService {
 
     /**
      * Получает тренера по ID.
-     * 
+     *
      * @param id ID тренера
      * @return DTO тренера или null если не найден
      */
@@ -89,25 +88,21 @@ public class TrainerService {
 
     /**
      * Получает полную информацию о тренере включая имена клиентов.
-     * 
+     *
      * @param id ID тренера
      * @return подробный DTO тренера или null если не найден
      */
     public TrainerDetailDto getTrainerDetailById(UUID id) {
-        Trainer trainer = trainerRepository.findById(id);
-        if (trainer == null) {
-            return null;
-        }
 
-        // Получаем имена клиентов для этого тренера через репозиторий клиентов
-        List<String> clientNames = clientRepository.findClientNamesByTrainerId(id);
+        Trainer detailById = trainerRepository.findTrainerDetailById(id);
+        List<String> clientNames = extractClientNames(detailById);
 
-        return trainerMapper.toDetailDto(trainer, clientNames);
+        return trainerMapper.toDetailDto(detailById, clientNames);
     }
 
     /**
      * Получает список тренеров с краткой информацией.
-     * 
+     *
      * @return список DTO тренеров
      */
     public List<TrainerDto> getAllTrainers() {
@@ -116,4 +111,19 @@ public class TrainerService {
                 .map(trainerMapper::toDto)
                 .collect(Collectors.toList());
     }
+
+    private List<String> extractClientNames(Trainer trainer) {
+        if (trainer.getClients() == null || trainer.getClients().isEmpty()) {
+            return List.of();
+        }
+
+        return trainer.getClients().stream()
+                .map(client -> String.format("%s %s %s",
+                                client.getSurname(),
+                                client.getName(),
+                                client.getPatronymic() != null ? client.getPatronymic() : "")
+                        .trim())
+                .collect(Collectors.toList());
+    }
 }
+
