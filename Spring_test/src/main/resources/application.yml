@@ -10,7 +10,7 @@ spring:
     url: jdbc:postgresql://localhost:5435/fibonacci_db
     username: postgres
     password: postgres
-#    initialize: true
+    initialize: true
     driver-class-name: org.postgresql.Driver
   sql:
     init:
