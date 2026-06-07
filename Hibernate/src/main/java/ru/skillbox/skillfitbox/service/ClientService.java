@@ -1,8 +1,11 @@
 package ru.skillbox.skillfitbox.service;
 
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.Hibernate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.skillbox.skillfitbox.dto.ClientDetailDto;
 import ru.skillbox.skillfitbox.dto.ClientDto;
 import ru.skillbox.skillfitbox.entity.AdditionalService;
@@ -12,9 +15,9 @@ import ru.skillbox.skillfitbox.entity.Trainer;
 import ru.skillbox.skillfitbox.mapper.ClientMapper;
 import ru.skillbox.skillfitbox.mapper.LockerMapper;
 import ru.skillbox.skillfitbox.mapper.TrainerMapper;
+import ru.skillbox.skillfitbox.repository.AdditionalServiceRepository;
 import ru.skillbox.skillfitbox.repository.ClientRepository;
 import ru.skillbox.skillfitbox.repository.LockerRepository;
-import ru.skillbox.skillfitbox.repository.AdditionalServiceRepository;
 import ru.skillbox.skillfitbox.repository.TrainerRepository;
 
 import java.util.ArrayList;
@@ -41,10 +44,11 @@ public class ClientService {
 
     /**
      * Добавляет нового клиента в систему.
-     * 
+     *
      * @param clientDto данные клиента для добавления
      * @return созданный DTO клиента
      */
+    @Transactional
     public ClientDto addClient(ClientDto clientDto) {
         Client client = clientMapper.toEntity(clientDto);
         client.setIsActive(true);
@@ -54,32 +58,33 @@ public class ClientService {
 
     /**
      * Обновляет информацию о клиенте.
-     * 
-     * @param id ID клиента
+     *
+     * @param id        ID клиента
      * @param clientDto обновленные данные клиента
      * @return обновленный DTO клиента
      */
+    @Transactional
     public ClientDto updateClient(UUID id, ClientDto clientDto) {
-        Client existingClient = clientRepository.findClientDetailById(id);
-        if (existingClient == null) {
-            throw new RuntimeException("Клиент с ID " + id + " не найден");
-        }
-        
+        Client existingClient = clientRepository.findClientDetailById(id)
+                .orElseThrow(() -> new RuntimeException("Клиент с ID " + id + " не найден"));
+
         clientDto.setId(id);
         Client client = clientMapper.toEntity(clientDto);
         client.setServices(existingClient.getServices());
         client.setLocker(existingClient.getLocker());
         client.setTrainer(existingClient.getTrainer());
         client.setCreatedDatetime(existingClient.getCreatedDatetime());
+
         Client updatedClient = clientRepository.update(client);
         return clientMapper.toDto(updatedClient);
     }
 
     /**
      * Получает всех клиентов.
-     * 
+     *
      * @return список всех DTO клиентов
      */
+    @Transactional(readOnly = true)
     public List<ClientDto> getAllClients() {
         List<Client> clients = clientRepository.findAll();
         return clients.stream()
@@ -89,27 +94,29 @@ public class ClientService {
 
     /**
      * Получает краткую информацию о клиенте по ID.
-     * 
+     *
      * @param id ID клиента
      * @return DTO клиента или null если не найден
      */
+    @Transactional(readOnly = true)
     public ClientDto getClientById(UUID id) {
-        Client client = clientRepository.findById(id);
+        Client client = clientRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Клиент с ID " + id + " не найден"));
+        ;
         return client != null ? clientMapper.toDto(client) : null;
     }
 
     /**
      * Получает подробную информацию о клиенте по ID включая тренера, услуги и шкафчик.
      * Использует один SQL-запрос с JOIN для оптимизации производительности.
-     * 
+     *
      * @param id ID клиента
      * @return подробный DTO клиента или null если не найден
      */
+    @Transactional(readOnly = true)
     public ClientDetailDto getClientDetailById(UUID id) {
-        Client client = clientRepository.findClientDetailById(id);
-        if (client == null) {
-            return null;
-        }
+        Client client = clientRepository.findClientDetailById(id)
+                .orElseThrow(() -> new RuntimeException("Клиент с ID " + id + " не найден"));
 
         ClientDetailDto detailDto = new ClientDetailDto();
         detailDto.setId(client.getId());
@@ -146,36 +153,34 @@ public class ClientService {
 
     /**
      * Активирует или деактивирует клиента.
-     * 
-     * @param id ID клиента
+     *
+     * @param id       ID клиента
      * @param isActive новый статус активности
      */
+    @Transactional
     public void updateClientStatus(UUID id, Boolean isActive) {
-        Client client = clientRepository.findClientDetailById(id);
-        if (client == null) {
-            throw new RuntimeException("Клиент с ID " + id + " не найден");
-        }
+        Client client = clientRepository.findClientDetailById(id)
+                .orElseThrow(() -> new RuntimeException("Клиент с ID " + id + " не найден"));
+        ;
         client.setIsActive(isActive);
         clientRepository.update(client);
     }
 
     /**
      * Назначает тренера клиенту.
-     * 
-     * @param clientId ID клиента
+     *
+     * @param clientId  ID клиента
      * @param trainerId ID тренера
      */
+    @Transactional
     public void assignTrainer(UUID clientId, UUID trainerId) {
-        Client client = clientRepository.findClientDetailById(clientId);
-        if (client == null) {
-            throw new RuntimeException("Клиент с ID " + clientId + " не найден");
-        }
-        
-        Trainer trainer = trainerRepository.findById(trainerId);
-        if (trainer == null) {
-            throw new RuntimeException("Тренер с ID " + trainerId + " не найден");
-        }
-        
+        Client client = clientRepository.findClientDetailById(clientId)
+                .orElseThrow(() -> new RuntimeException("Клиент с ID " + clientId + " не найден"));
+        ;
+
+        Trainer trainer = trainerRepository.findById(trainerId)
+                .orElseThrow(() -> new RuntimeException("Тренер с ID " + trainerId + " не найден"));
+
         client.setTrainer(trainer);
 
         clientRepository.update(client);
@@ -183,59 +188,73 @@ public class ClientService {
 
     /**
      * Добавляет дополнительную услугу клиенту.
-     * 
-     * @param clientId ID клиента
+     *
+     * @param clientId  ID клиента
      * @param serviceId ID услуги
      */
+    @Transactional
     public void addServiceToClient(UUID clientId, String serviceId) {
-        Client client = clientRepository.findById(clientId);
-        if (client == null) {
-            throw new RuntimeException("Клиент с ID " + clientId + " не найден");
+        Client client = clientRepository.findById(clientId)
+                .orElseThrow(() -> new RuntimeException("Клиент с ID " + clientId + " не найден"));
+
+        AdditionalService service = additionalServiceRepository.findById(serviceId)
+                .orElseThrow(() -> new RuntimeException("Услуга с ID " + serviceId + " не найдена"));
+
+        boolean alreadyHasService = client.getServices().stream()
+                .anyMatch(s -> s.getId().equals(serviceId));
+
+        if (alreadyHasService) {
+            log.warn("Услуга {} уже добавлена клиенту {}", serviceId, clientId);
+            return;
         }
-        
-        AdditionalService service = additionalServiceRepository.findById(serviceId);
-        if (service == null) {
-            throw new RuntimeException("Услуга с ID " + serviceId + " не найдена");
-        }
-        
         additionalServiceRepository.addServiceToClient(clientId, serviceId);
     }
 
     /**
      * Назначает шкафчик клиенту.
-     * 
+     *
      * @param clientId ID клиента
      * @param lockerId ID шкафчика
      */
+    @Transactional
     public void assignLocker(UUID clientId, UUID lockerId) {
-        Client client = clientRepository.findClientDetailById(clientId);
-        if (client == null) {
-            throw new RuntimeException("Клиент с ID " + clientId + " не найден");
-        }
-        
-        Locker locker = lockerRepository.findById(lockerId);
-        if (locker == null) {
-            throw new RuntimeException("Шкафчик с ID " + lockerId + " не найден");
-        }
-        
-        if (locker.getClient() != null && locker.getClient().getId() != null) {
-            if (Objects.equals(clientId, locker.getClient().getId())) {
-                log.info("Шкафчик уже занят данным клиентом - ничего не делаем");
-                return;
-            }
-            throw new RuntimeException("Шкафчик уже занят");
-        }
-        
-        // Удаляем предыдущее назначение шкафчика если существует
-        if (client.getLocker() != null) {
-            client.getLocker().setClient(null);
-            lockerRepository.update(client.getLocker());
-        }
-        
-        client.setLocker(locker);
-        locker.setClient(client);
+        log.info("Назначение шкафчика {} клиенту {}", lockerId, clientId);
 
-        clientRepository.update(client);
-        lockerRepository.update(locker);
+        // Загружаем сущности
+        Client client = clientRepository.findById(clientId)
+                .orElseThrow(() -> new RuntimeException("Клиент не найден"));
+
+        Locker locker = lockerRepository.findById(lockerId)
+                .orElseThrow(() -> new RuntimeException("Шкафчик не найден"));
+
+        // ВАЖНО: Проверяем, не занят ли шкафчик (нужно инициализировать LAZY поле)
+        if (locker.getClient() != null && !locker.getClient().getId().equals(clientId)) {
+            throw new RuntimeException("Шкафчик уже занят другим клиентом");
+        }
+
+        // Проверка: не пытаемся ли назначить тот же шкафчик
+        if (client.getLocker() != null && client.getLocker().getId().equals(lockerId)) {
+            log.info("У клиента уже назначен этот шкафчик");
+            return;
+        }
+
+        // Освобождаем старый шкафчик (если был)
+        if (client.getLocker() != null) {
+            Locker oldLocker = client.getLocker();
+            oldLocker.setClient(null);  // Разрываем связь в обратной стороне
+            // Не нужно вызывать update!
+        }
+
+        // КРИТИЧНО: Синхронизируем ОБЕ стороны!
+        client.setLocker(locker);  // Устанавливаем связь с клиента
+        locker.setClient(client);   // Устанавливаем обратную связь (ВАЖНО!)
+
+        // После этого Hibernate сам выполнит:
+        // UPDATE clients SET locker_id = ? WHERE id = ?
+
+        log.info("Шкафчик {} назначен клиенту {}", locker.getNumber(), client.getSurname());
+
+        // НЕ вызывайте clientRepository.update(client) - это лишнее!
+        // Hibernate автоматически сохранит изменения в конце транзакции
     }
 }
