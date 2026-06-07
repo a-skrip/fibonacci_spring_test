@@ -7,8 +7,11 @@ spring:
       ddl-auto: create
       show-sql: true
   datasource:
-    url: jdbc:postgresql://localhost:5432/fibonacci_db
-    username: user
-    password: Ad0ZfRbh6UX9
-    initialization-mode: always
-    initialize: true
+    url: jdbc:postgresql://localhost:5435/fibonacci_db
+    username: postgres
+    password: postgres
+#    initialize: true
+    driver-class-name: org.postgresql.Driver
+  sql:
+    init:
+      mode: always
