@@ -1,5 +1,6 @@
 package com.skillbox.fibonacci.adapter.web;
 
+import com.skillbox.fibonacci.adapter.persistence.FibonacciRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +30,9 @@ class FibonacciControllerTest {
     @Autowired
     TestRestTemplate restTemplate;
 
+    @Autowired
+    FibonacciRepository repository;
+
     @LocalServerPort
     private int port;
 
@@ -50,7 +54,7 @@ class FibonacciControllerTest {
 
     @Test
     @DisplayName("При запросе индекса < 1 -> 400 и текст ошибки")
-    void sendIndexLessThanOneAndGet400AndErrorText () {
+    void sendIndexLessThanOneAndGet400AndErrorText() {
         int invalidIndex = -1;
 
         String url = "http://localhost:" + port + "/fibonacci/" + invalidIndex;
@@ -62,6 +66,21 @@ class FibonacciControllerTest {
         assertThat(response.getBody()).isNotNull();
         assertThat(response.getBody()).contains("Число Фибоначчи не может иметь отрицательный или нулевой индекс");
         assertThat(response.getBody()).contains(String.valueOf(invalidIndex));
+    }
+
+    @Test
+    @DisplayName("При рассчете числа -> возвращается и пишется в БД одно и тоже число")
+    void whenCalculate47AndMore_returnsAndSaveSameNumber() {
+        int overflow = 47;
+
+        String url = "http://localhost:" + port + "/fibonacci/" + overflow;
+        ResponseEntity<FibonacciResponse> response =
+                restTemplate.getForEntity(url, FibonacciResponse.class);
+
+        BigInteger responseValue = response.getBody().value();
+        BigInteger databaseValue = BigInteger.valueOf(repository.findByIndex(overflow).get().getValue());
+
+        assertThat(responseValue).isEqualTo(databaseValue);
     }
 
 }

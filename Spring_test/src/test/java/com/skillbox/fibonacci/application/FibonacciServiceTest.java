@@ -7,6 +7,7 @@ import com.skillbox.fibonacci.domain.model.FibonacciNumber;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -75,5 +76,33 @@ class FibonacciServiceTest {
         verify(repository).findByIndex(7);
         verify(calculator).getFibonacciNumber(eq(index));
         verify(repository).save(any(FibonacciNumberEntity.class));
+    }
+
+    @Test
+    @DisplayName("Когда результат больше Integer.MAX_VALUE -> записывается корректное значение")
+    void shouldSaveLongValueToDatabaseWhenFibonacciNumberExceedsIntegerMaxValue() {
+        //Arrange
+        FibonacciIndex index = new FibonacciIndex(47);
+        BigInteger value = BigInteger.valueOf(2971215073L);
+
+        FibonacciNumberEntity entity = new FibonacciNumberEntity(47, 2971215073L);
+
+        when(calculator.getFibonacciNumber(index)).thenReturn(value);
+
+        //Act
+        service.fibonacciNumber(index);
+
+        ArgumentCaptor<FibonacciNumberEntity> captor =
+                ArgumentCaptor.forClass(FibonacciNumberEntity.class);
+
+        verify(repository).save(captor.capture());
+
+        BigInteger valueSavedEntity = BigInteger.valueOf(captor.getValue().getValue());
+
+        //Assert
+        assertThat(valueSavedEntity)
+                .as("Ожидается %d, но сохранено %d (баг: используется intValue())",
+                        2971215073L, valueSavedEntity)
+                .isEqualTo(value);
     }
 }

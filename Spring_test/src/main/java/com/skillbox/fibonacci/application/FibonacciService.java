@@ -31,7 +31,7 @@ public class FibonacciService {
                     log.info("В БД не найден готовый расчет. Старт подсчета числа с индексом {}", index);
 
                     BigInteger value = calculator.getFibonacciNumber(index);
-                    repository.save(new FibonacciNumberEntity(index.n(), value.intValue()));
+                    repository.save(new FibonacciNumberEntity(index.n(), value.longValue()));
 
                     log.info("Число для индекса {} = {} и записано в БД", index, value);
                     return new FibonacciNumber(index, value);
