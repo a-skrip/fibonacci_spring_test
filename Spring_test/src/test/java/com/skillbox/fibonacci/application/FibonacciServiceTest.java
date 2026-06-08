@@ -85,8 +85,6 @@ class FibonacciServiceTest {
         FibonacciIndex index = new FibonacciIndex(47);
         BigInteger value = BigInteger.valueOf(2971215073L);
 
-        FibonacciNumberEntity entity = new FibonacciNumberEntity(47, 2971215073L);
-
         when(calculator.getFibonacciNumber(index)).thenReturn(value);
 
         //Act
